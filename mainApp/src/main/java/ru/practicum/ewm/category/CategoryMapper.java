@@ -2,6 +2,9 @@ package ru.practicum.ewm.category;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class CategoryMapper {
     public static CategoryDto toCategoryDto(Category category) {
@@ -16,5 +19,13 @@ public class CategoryMapper {
         category.setCategoryId(categoryDto.getCategoryId());
         category.setName(categoryDto.getName());
         return category;
+    }
+
+    public static List<CategoryDto> toCategoryDtoList(List<Category> categories) {
+        List<CategoryDto> dtos = new ArrayList<>();
+        for (Category category : categories) {
+            dtos.add(toCategoryDto(category));
+        }
+        return dtos;
     }
 }
