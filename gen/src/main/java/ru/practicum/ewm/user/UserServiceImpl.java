@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
 
     public List<User> getUsers(List<Long> ids, Integer from, Integer size) {
         validateIds(ids);
+
         return null;
     }
 
