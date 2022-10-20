@@ -57,7 +57,8 @@ public class Event {
     private Boolean requestModeration;
 
     @Column(name = "state", nullable = false)
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private EventState state = EventState.PENDING;
 
     @Column(name = "title", nullable = false)
     private String title;

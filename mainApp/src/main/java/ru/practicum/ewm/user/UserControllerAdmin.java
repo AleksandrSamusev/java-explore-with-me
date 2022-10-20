@@ -18,8 +18,8 @@ public class UserControllerAdmin {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public UserDto createUser(@RequestBody NewUserRequest newUserRequest) {
+        return userService.createUser(newUserRequest);
     }
 
     @DeleteMapping("/{userId}")
@@ -28,9 +28,9 @@ public class UserControllerAdmin {
     }
 
     @GetMapping
-    public List<User> getUsers(@RequestParam List<Long> ids,
-                               @RequestParam(required = false, defaultValue = "0") Integer from,
-                               @RequestParam(required = false, defaultValue = "10") Integer size) {
+    public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
+                                  @RequestParam(required = false, defaultValue = "0") Integer from,
+                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
         return userService.getUsers(ids, from, size);
     }
 

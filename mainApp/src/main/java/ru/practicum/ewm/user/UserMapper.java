@@ -2,6 +2,9 @@ package ru.practicum.ewm.user;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class UserMapper {
     public static UserDto toUserDto(User user) {
@@ -32,6 +35,21 @@ public class UserMapper {
         user.setUserId(userShortDto.getUserId());
         user.setName(userShortDto.getName());
         return user;
+    }
+
+    public static User toUserFromNewRequest(NewUserRequest newUserRequest) {
+        User user = new User();
+        user.setName(newUserRequest.getName());
+        user.setEmail(newUserRequest.getEmail());
+        return user;
+    }
+
+    public static List<UserDto> toUserDtoList(List<User> users) {
+        List<UserDto> dtos = new ArrayList<>();
+        for (User user : users) {
+            dtos.add(toUserDto(user));
+        }
+        return dtos;
     }
 
 

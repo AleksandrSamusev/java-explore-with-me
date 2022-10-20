@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ewm-stat</artifactId>
+    <artifactId>statsApp</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <name>Ewm statistics</name>

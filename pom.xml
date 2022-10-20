@@ -23,8 +23,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>gen</module>
-        <module>util</module>
+        <module>mainApp</module>
+        <module>statsApp</module>
     </modules>
 
     <build>
