@@ -26,6 +26,7 @@ public class CategoryControllerPublic {
         return categoryService.getCategories(from, size);
     }
 
+    @GetMapping("/{categoryId}")
     public CategoryDto getCategoryById(Long categoryId) {
         return categoryService.getCategoryById(categoryId);
     }
