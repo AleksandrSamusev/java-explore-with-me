@@ -18,7 +18,7 @@ public class ParticipationRequestDto {
     private Long requestId;
     @NotNull
     private Long eventId;
-    private LocalDateTime created;
+    private LocalDateTime created = LocalDateTime.now();
     @NotNull
     private Long requesterId;
     @Enumerated(EnumType.STRING)
