@@ -4,6 +4,9 @@ import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.CategoryMapper;
 import ru.practicum.ewm.user.UserMapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class EventMapper {
     public static Event toEvent(EventFullDto eventFullDto) {
@@ -46,5 +49,27 @@ public class EventMapper {
         eventFullDto.setViews(event.getViews());
         eventFullDto.setRequestModeration(event.getRequestModeration());
         return eventFullDto;
+    }
+
+    public static EventShortDto toEventShortDto(Event event) {
+        EventShortDto eventShortDto = new EventShortDto();
+        eventShortDto.setAnnotation(event.getAnnotation());
+        eventShortDto.setCategoryDto(CategoryMapper.toCategoryDto(event.getCategory()));
+        eventShortDto.setEventId(event.getEventId());
+        eventShortDto.setEventDate(event.getEventDate());
+        eventShortDto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
+        eventShortDto.setPaid(event.getPaid());
+        eventShortDto.setConfirmedRequests(event.getConfirmedRequests());
+        eventShortDto.setTitle(event.getTitle());
+        eventShortDto.setViews(event.getViews());
+        return eventShortDto;
+    }
+
+    public static List<EventShortDto> toEventShortDtos(List<Event> events) {
+        List<EventShortDto> dtos = new ArrayList<>();
+        for (Event event : events) {
+            dtos.add(toEventShortDto(event));
+        }
+        return dtos;
     }
 }

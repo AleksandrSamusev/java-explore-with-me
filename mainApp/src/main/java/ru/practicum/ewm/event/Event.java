@@ -51,7 +51,7 @@ public class Event {
     private LocalDateTime publishedOn;
 
     @Column(name = "created_on", nullable = false)
-    private LocalDateTime createdOn;
+    private LocalDateTime createdOn = LocalDateTime.now();
 
     @Column(name = "request_moderation", nullable = false)
     private Boolean requestModeration;

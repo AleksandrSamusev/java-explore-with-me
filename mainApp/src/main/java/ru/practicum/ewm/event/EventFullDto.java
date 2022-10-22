@@ -19,7 +19,7 @@ public class EventFullDto {
     private String annotation;
     private CategoryDto categoryDto;
     private Long confirmedRequests;
-    private LocalDateTime createdOn;
+    private LocalDateTime createdOn = LocalDateTime.now();
     private String description;
     private LocalDateTime eventDate;
     private Long eventId;
@@ -29,7 +29,8 @@ public class EventFullDto {
     private Integer participantLimit;
     private LocalDateTime publishedOn;
     private Boolean requestModeration;
-    private EventState state;
+    private EventState state = EventState.PENDING;
+    ;
     private String title;
     private Integer views;
 }
