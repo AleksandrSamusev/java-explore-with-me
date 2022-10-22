@@ -8,6 +8,7 @@ import ru.practicum.ewm.category.CategoryMapper;
 import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.UserMapper;
 import ru.practicum.ewm.user.UserRepository;
 
@@ -18,10 +19,12 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
 
-    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository) {
+    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.requestRepository = requestRepository;
     }
 
     public List<EventShortDto> findAllUsersEvents(Long userId, Integer from, Integer size) {
@@ -109,8 +112,52 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    public List<ParticipationRequestDto> findAllRequestsByUserIdAndEventId(Long userId, Long eventId) {
+        validateUserId(userId);
+        validateEventId(eventId);
+        return RequestMapper.toParticipationRequestDtos(requestRepository
+                .findAllRequestsByUserIdAndEventId(userId, eventId));
+    }
+
+    public ParticipationRequestDto confirmAnotherRequestToUsersEvent(Long userId, Long eventId, Long requestId) {
+        validateUserId(userId);
+        validateEventId(eventId);
+        validateRequestId(requestId);
+        Request tempRequest = requestRepository.getReferenceById(requestId);
+        Event tempEvent = eventRepository.getReferenceById(eventId);
+        if (tempEvent.getParticipantLimit() == 0 || !tempEvent.getRequestModeration()) {
+            tempRequest.setStatus(RequestStatus.CONFIRMED);
+        } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
+                == tempEvent.getParticipantLimit()) {
+            throw new InvalidParameterException("Denied. Participants limit reached");
+        } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
+                == tempEvent.getParticipantLimit() - 1) {
+            tempRequest.setStatus(RequestStatus.CONFIRMED);
+            List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
+            for (Request request : pendingRequests) {
+                requestRepository.getReferenceById(request.getRequestId()).setStatus(RequestStatus.CANCELLED);
+            }
+        }
+        return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
+    }
+
+    public ParticipationRequestDto rejectAnotherRequestToUsersEvent(Long userId, Long eventId, Long requestId) {
+        validateUserId(userId);
+        validateEventId(eventId);
+        validateRequestId(requestId);
+        Request tempRequest = requestRepository.getReferenceById(requestId);
+        tempRequest.setStatus(RequestStatus.CANCELLED);
+        return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
+    }
+
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
+            throw new EventNotFoundException("Event not found");
+        }
+    }
+
+    private void validateRequestId(Long requestId) {
+        if (!requestRepository.existsById(requestId)) {
             throw new EventNotFoundException("Event not found");
         }
     }

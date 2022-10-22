@@ -3,6 +3,7 @@ package ru.practicum.ewm.event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.request.ParticipationRequestDto;
 
 import java.util.List;
 
@@ -46,5 +47,25 @@ public class EventControllerPrivate {
     public EventFullDto cancelEventByUserIdAndEventId(@PathVariable Long userId,
                                                       @PathVariable Long eventId) {
         return eventService.cancelEventByUserIdAndEventId(userId, eventId);
+    }
+
+    @GetMapping("/{eventId}/requests")
+    public List<ParticipationRequestDto> findAllRequestsByUserIdAndEventId(@PathVariable Long userId,
+                                                                           @PathVariable Long eventId) {
+        return eventService.findAllRequestsByUserIdAndEventId(userId, eventId);
+    }
+
+    @PatchMapping("/{eventId}/requests/{requestId}/confirm")
+    public ParticipationRequestDto confirmAnotherRequestToUsersEvent(@PathVariable Long userId,
+                                                                     @PathVariable Long eventId,
+                                                                     @PathVariable Long requestId) {
+        return eventService.confirmAnotherRequestToUsersEvent(userId, eventId, requestId);
+    }
+
+    @PatchMapping("/{eventId}/requests/{requestId}/reject")
+    public ParticipationRequestDto rejectAnotherRequestToUsersEvent(@PathVariable Long userId,
+                                                                    @PathVariable Long eventId,
+                                                                    @PathVariable Long requestId) {
+        return eventService.rejectAnotherRequestToUsersEvent(userId, eventId, requestId);
     }
 }
