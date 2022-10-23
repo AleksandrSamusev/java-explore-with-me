@@ -150,17 +150,53 @@ public class EventServiceImpl implements EventService {
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
     }
 
-    private void validateEventId(Long eventId) {
-        if (!eventRepository.existsById(eventId)) {
-            throw new EventNotFoundException("Event not found");
-        }
-    }
-
     public List<EventFullDto> findAllUsersEventsFull(List<Long> ids, List<String> states, List<String> categories,
                                                      String rangeStart, String rangeEnd, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("eventId"));
         return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(ids, categories, states,
                 rangeStart, rangeEnd, pageable));
+    }
+
+    public EventFullDto changeEvent(Long eventId, EventFullDto eventFullDto) {
+        Event temp = eventRepository.getReferenceById(eventId);
+        temp.setAnnotation(eventFullDto.getAnnotation());
+        temp.setCategory(CategoryMapper.toCategory(eventFullDto.getCategoryDto()));
+        temp.setDescription(eventFullDto.getDescription());
+        temp.setEventDate(eventFullDto.getEventDate());
+        temp.setLocation(eventFullDto.getLocation());
+        temp.setPaid(eventFullDto.getPaid());
+        temp.setParticipantLimit(eventFullDto.getParticipantLimit());
+        temp.setRequestModeration(eventFullDto.getRequestModeration());
+        temp.setTitle(eventFullDto.getTitle());
+        return EventMapper.toEventFullDto(eventRepository.save(temp));
+    }
+
+    public EventFullDto publishEvent(Long eventId) {
+        validateEventId(eventId);
+        Event tempEvent = eventRepository.getReferenceById(eventId);
+        if (tempEvent.getEventDate().isBefore(LocalDateTime.now().plusHours(1L))) {
+            throw new InvalidParameterException("Denied. Less then 1hr before the event");
+        } else if (!tempEvent.getState().equals(EventState.PENDING)) {
+            throw new InvalidParameterException("Denied. Event should have PENDING state");
+        }
+        tempEvent.setState(EventState.PUBLISHED);
+        return EventMapper.toEventFullDto(eventRepository.save(tempEvent));
+    }
+
+    public EventFullDto rejectEvent(Long eventId) {
+        validateEventId(eventId);
+        Event tempEvent = eventRepository.getReferenceById(eventId);
+        if (tempEvent.getState().equals(EventState.PUBLISHED)) {
+            throw new InvalidParameterException("Denied. Event is already published");
+        }
+        tempEvent.setState(EventState.CANCELLED);
+        return EventMapper.toEventFullDto(eventRepository.save(tempEvent));
+    }
+
+    private void validateEventId(Long eventId) {
+        if (!eventRepository.existsById(eventId)) {
+            throw new EventNotFoundException("Event not found");
+        }
     }
 
     private void validateRequestId(Long requestId) {
