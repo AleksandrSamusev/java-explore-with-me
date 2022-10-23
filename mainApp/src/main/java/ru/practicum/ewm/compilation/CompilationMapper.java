@@ -2,6 +2,9 @@ package ru.practicum.ewm.compilation;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class CompilationMapper {
     public static Compilation toCompilation(CompilationDto compilationDto) {
@@ -28,5 +31,13 @@ public class CompilationMapper {
         newCompilationDto.setPinned(compilation.getPinned());
         newCompilationDto.setEvents(compilation.getEvents());
         return newCompilationDto;
+    }
+
+    public static List<CompilationDto> toCompilationDtos(List<Compilation> compilations) {
+        List<CompilationDto> dtos = new ArrayList<>();
+        for (Compilation compilation : compilations) {
+            dtos.add(toCompilationDto(compilation));
+        }
+        return dtos;
     }
 }
