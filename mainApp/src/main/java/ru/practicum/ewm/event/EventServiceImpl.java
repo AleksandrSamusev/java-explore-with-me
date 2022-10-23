@@ -156,6 +156,13 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    public List<EventFullDto> findAllUsersEventsFull(List<Long> ids, List<String> states, List<String> categories,
+                                                     String rangeStart, String rangeEnd, Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("eventId"));
+        return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(ids, categories, states,
+                rangeStart, rangeEnd, pageable));
+    }
+
     private void validateRequestId(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             throw new EventNotFoundException("Event not found");
@@ -170,7 +177,15 @@ public class EventServiceImpl implements EventService {
 
     private void validateEventFullDto(EventFullDto eventFullDto) {
         if (eventFullDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2L))) {
-            throw new InvalidParameterException("Denied. Less then 2hrs to event!");
+            throw new InvalidParameterException("Denied. Less then 2hrs before the event.");
+        }
+    }
+
+    private void validateIds(List<Long> ids) {
+        for (Long id : ids) {
+            if (!userRepository.existsById(id)) {
+                throw new UserNotFoundException("User not found");
+            }
         }
     }
 }

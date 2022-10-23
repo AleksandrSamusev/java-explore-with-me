@@ -72,4 +72,12 @@ public class EventMapper {
         }
         return dtos;
     }
+
+    public static List<EventFullDto> toEventFullDtos(List<Event> events) {
+        List<EventFullDto> dtos = new ArrayList<>();
+        for (Event event : events) {
+            dtos.add(toEventFullDto(event));
+        }
+        return dtos;
+    }
 }
