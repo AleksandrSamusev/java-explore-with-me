@@ -1,9 +1,9 @@
 ## "Explore with me" - приложение для шеринга мероприятиями и событиями
 
-- [общая информация о приложении](#Общая информация о приложении)
-- [описание структуры приложения](#Структура приложения)
-- [ER-диаграмма](#ER диаграмма)
-- [диаграмма компонентов](#Диаграмма компонентов)
+- [общая информация о приложении](#общая-информация-о-приложении)
+- [описание структуры приложения](#структура-приложения)
+- [ER-диаграмма](#ER-диаграмма)
+- [диаграмма компонентов](#диаграмма-компонентов)
 
 ### Общая информация о приложении
 
@@ -32,8 +32,8 @@
 
 ### ER диаграмма
 
-![ER-диаграмма](C:\Users\samus\development\java\java-explore-with-me\java-explore-with-me\mainApp\src\main\resources\img\ER-diagramm(EWM).png)
+![ER-диаграмма](https://github.com/AleksandrSamusev/java-explore-with-me/blob/develop/mainApp/src/main/resources/img/ER-diagramm(EWM).png?raw=true)
 
 ### Диаграмма компонентов
 
-![диаграмма компонентов](C:\Users\samus\development\java\java-explore-with-me\java-explore-with-me\mainApp\src\main\resources\img\AppArch(last_last).png)
+![диаграмма компонентов](https://github.com/AleksandrSamusev/java-explore-with-me/blob/develop/mainApp/src/main/resources/img/AppArch(last_last).png?raw=true)
