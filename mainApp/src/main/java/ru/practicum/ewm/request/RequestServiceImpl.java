@@ -1,6 +1,7 @@
 package ru.practicum.ewm.request;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.event.EventState;
 import ru.practicum.ewm.exception.EventNotFoundException;
@@ -18,7 +19,8 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
 
-    public RequestServiceImpl(RequestRepository requestRepository, UserRepository userRepository, EventRepository eventRepository) {
+    public RequestServiceImpl(RequestRepository requestRepository, UserRepository userRepository,
+                              EventRepository eventRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
@@ -38,21 +40,21 @@ public class RequestServiceImpl implements RequestService {
                 throw new InvalidParameterException("Denied. Request already created");
             }
         }
-        if (Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getUserId(), userId)) {
+        if (Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getId(), userId)) {
             throw new InvalidParameterException("Denied. Can't be requested by initiator");
         } else if (!eventRepository.getReferenceById(eventId).getState().equals(EventState.PUBLISHED)) {
             throw new InvalidParameterException("Denied. Event is not published");
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size() ==
                 eventRepository.getReferenceById(eventId).getParticipantLimit()) {
             throw new InvalidParameterException("Denied. Participants limit reached.");
-        } else if (!eventRepository.getReferenceById(eventId).getRequestModeration()) {
+        } else {
             Request request = requestRepository.findAllPendingRequestsByEventIdAndUserId(userId, eventId).get(0);
             request.setStatus(RequestStatus.CONFIRMED);
+            Event temp = eventRepository.getReferenceById(eventId);
+            temp.setConfirmedRequests(temp.getConfirmedRequests() + 1);
+            eventRepository.save(temp);
             return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
         }
-        Request request = requestRepository.findAllPendingRequestsByEventIdAndUserId(userId, eventId).get(0);
-        request.setStatus(RequestStatus.CONFIRMED);
-        return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
     public ParticipationRequestDto cancelOwnRequest(Long userId, Long requestId) {

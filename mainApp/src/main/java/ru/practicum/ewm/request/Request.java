@@ -13,7 +13,7 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "request_id")
-    private Long requestId;
+    private Long id;
 
     @NotNull
     @Column(name = "event_id", nullable = false)

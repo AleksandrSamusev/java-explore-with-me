@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewCompilationDto {
-    private List<Long> eventIds;
+    private List<Long> ids;
     private String title;
     private Boolean pinned;
 }

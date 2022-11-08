@@ -17,7 +17,6 @@ import java.util.Map;
 @Service
 public class StatsClient extends BaseClient {
 
-
     @Autowired
     public StatsClient(@Value("${STAT_SERVER_URL}") String serverUrl, RestTemplateBuilder builder) {
         super(

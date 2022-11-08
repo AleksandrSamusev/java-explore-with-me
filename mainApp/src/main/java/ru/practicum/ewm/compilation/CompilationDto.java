@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CompilationDto {
-    private Long compilationId;
+    private Long id;
     private List<Event> events;
     private String title;
     private Boolean pinned;

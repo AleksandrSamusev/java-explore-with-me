@@ -9,7 +9,7 @@ import java.util.List;
 public class UserMapper {
     public static UserDto toUserDto(User user) {
         UserDto userDto = new UserDto();
-        userDto.setUserId(user.getUserId());
+        userDto.setId(user.getId());
         userDto.setName(user.getName());
         userDto.setEmail(user.getEmail());
         return userDto;
@@ -17,7 +17,7 @@ public class UserMapper {
 
     public static User toUser(UserDto userDto) {
         User user = new User();
-        user.setUserId(userDto.getUserId());
+        user.setId(userDto.getId());
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
         return user;
@@ -25,14 +25,14 @@ public class UserMapper {
 
     public static UserShortDto toUserShortDto(User user) {
         UserShortDto userShortDto = new UserShortDto();
-        userShortDto.setUserId(user.getUserId());
+        userShortDto.setId(user.getId());
         userShortDto.setName(user.getName());
         return userShortDto;
     }
 
     public static User toUserFromShortDto(UserShortDto userShortDto) {
         User user = new User();
-        user.setUserId(userShortDto.getUserId());
+        user.setId(userShortDto.getId());
         user.setName(userShortDto.getName());
         return user;
     }

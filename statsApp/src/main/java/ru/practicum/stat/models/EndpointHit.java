@@ -1,11 +1,13 @@
 package ru.practicum.stat.models;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@Builder
 @Entity
 @Table(name = "stats")
 @Data
@@ -30,4 +32,8 @@ public class EndpointHit {
 
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
+
+    public EndpointHit() {
+
+    }
 }
