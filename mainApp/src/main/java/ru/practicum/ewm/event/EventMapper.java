@@ -11,7 +11,7 @@ import java.util.List;
 public class EventMapper {
     public static Event toEvent(EventFullDto eventFullDto) {
         Event event = new Event();
-        event.setEventId(eventFullDto.getEventId());
+        event.setId(eventFullDto.getEventId());
         event.setEventDate(eventFullDto.getEventDate());
         event.setAnnotation(eventFullDto.getAnnotation());
         event.setCategory(CategoryMapper.toCategory(eventFullDto.getCategoryDto()));
@@ -32,7 +32,7 @@ public class EventMapper {
 
     public static EventFullDto toEventFullDto(Event event) {
         EventFullDto eventFullDto = new EventFullDto();
-        eventFullDto.setEventId(event.getEventId());
+        eventFullDto.setEventId(event.getId());
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setAnnotation(event.getAnnotation());
         eventFullDto.setCategoryDto(CategoryMapper.toCategoryDto(event.getCategory()));
@@ -55,7 +55,7 @@ public class EventMapper {
         EventShortDto eventShortDto = new EventShortDto();
         eventShortDto.setAnnotation(event.getAnnotation());
         eventShortDto.setCategoryDto(CategoryMapper.toCategoryDto(event.getCategory()));
-        eventShortDto.setEventId(event.getEventId());
+        eventShortDto.setEventId(event.getId());
         eventShortDto.setEventDate(event.getEventDate());
         eventShortDto.setInitiator(UserMapper.toUserShortDto(event.getInitiator()));
         eventShortDto.setPaid(event.getPaid());

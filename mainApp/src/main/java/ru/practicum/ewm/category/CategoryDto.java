@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryDto {
-    private Long categoryId;
+    private Long id;
     @NotNull
     @NotBlank
     @NotEmpty

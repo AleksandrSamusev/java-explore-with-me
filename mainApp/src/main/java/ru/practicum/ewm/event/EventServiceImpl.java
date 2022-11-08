@@ -12,7 +12,11 @@ import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.UserMapper;
 import ru.practicum.ewm.user.UserRepository;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -135,7 +139,7 @@ public class EventServiceImpl implements EventService {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
             for (Request request : pendingRequests) {
-                requestRepository.getReferenceById(request.getRequestId()).setStatus(RequestStatus.CANCELLED);
+                requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.CANCELLED);
             }
         }
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
@@ -223,5 +227,39 @@ public class EventServiceImpl implements EventService {
                 throw new UserNotFoundException("User not found");
             }
         }
+    }
+
+    public List<EventShortDto> getSortedEvents(String text, List<Integer> categories, Boolean paid,
+                                               String rangeStart, String rangeEnd, Boolean onlyAvailable,
+                                               String sort, Integer from, Integer size) {
+        LocalDateTime start;
+        LocalDateTime end;
+
+        if (rangeStart == null) {
+            start = LocalDateTime.now();
+        } else {
+            start = LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+
+        if (rangeEnd == null) {
+            end = LocalDateTime.now().plusYears(10);
+        } else {
+            end = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+
+        var events = eventRepository.getFilteredEvents(text, categories, paid, start, end,
+                onlyAvailable, from, size);
+
+        if (sort != null) {
+            if (sort.equals(EventSortType.EVENT_DATE)) {
+                events.stream().sorted(Comparator.comparing(Event::getEventDate));
+            }
+            if (sort.equals(EventSortType.VIEWS)) {
+                events.stream().sorted(Comparator.comparing(Event::getEventDate));
+            }
+        }
+
     }
 }

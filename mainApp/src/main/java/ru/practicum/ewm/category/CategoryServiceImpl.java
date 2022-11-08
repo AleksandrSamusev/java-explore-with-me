@@ -48,11 +48,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public CategoryDto patchCategory(CategoryDto categoryDto) {
-        Category category = categoryRepository.getReferenceById(categoryDto.getCategoryId());
+        Category category = categoryRepository.getReferenceById(categoryDto.getId());
         if (categoryDto.getName() != null && !categoryDto.getName().equals("")) {
             category.setName(categoryDto.getName());
         }
-        log.info("Updated category with ID = {} ", categoryDto.getCategoryId());
+        log.info("Updated category with ID = {} ", categoryDto.getId());
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 }

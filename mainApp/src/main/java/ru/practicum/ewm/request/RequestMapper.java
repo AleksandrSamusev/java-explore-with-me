@@ -10,7 +10,7 @@ public class RequestMapper {
     public static Request toRequest(ParticipationRequestDto participationRequestDto) {
         Request request = new Request();
         request.setRequesterId(participationRequestDto.getRequesterId());
-        request.setRequestId(participationRequestDto.getRequestId());
+        request.setId(participationRequestDto.getRequestId());
         request.setCreated(participationRequestDto.getCreated());
         request.setEventId(participationRequestDto.getEventId());
         request.setStatus(participationRequestDto.getStatus());
@@ -22,7 +22,7 @@ public class RequestMapper {
         participationRequestDto.setRequesterId(request.getRequesterId());
         participationRequestDto.setStatus(request.getStatus());
         participationRequestDto.setCreated(request.getCreated());
-        participationRequestDto.setRequestId(request.getRequestId());
+        participationRequestDto.setRequestId(request.getId());
         participationRequestDto.setEventId(request.getEventId());
         return participationRequestDto;
     }

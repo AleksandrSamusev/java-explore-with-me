@@ -27,7 +27,7 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> findCompilationsByPinned(Boolean pinned, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("compilationId"));
         return CompilationMapper.toCompilationDtos(compilationRepository
-                .findAllComtilationsByPinnedState(pinned, pageable));
+                .findAllCompilationsByPinnedState(pinned, pageable));
     }
 
     public CompilationDto findCompilationByCompilationId(Long compilationId) {
@@ -38,7 +38,7 @@ public class CompilationServiceImpl implements CompilationService {
     public NewCompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         validateNewCompilationDto(newCompilationDto);
         Compilation tempCompilation = CompilationMapper.toCompilationFromNew(newCompilationDto);
-        for (Long id : newCompilationDto.getEventIds()) {
+        for (Long id : newCompilationDto.getIds()) {
             tempCompilation.getEvents().add(eventRepository.getReferenceById(id));
         }
         return CompilationMapper.toNewCompilationDto(compilationRepository.save(tempCompilation));
@@ -57,7 +57,7 @@ public class CompilationServiceImpl implements CompilationService {
         List<Event> tempEvents = tempCompilation.getEvents();
         int index = 0;
         for (Event event : tempEvents) {
-            if (!Objects.equals(event.getEventId(), eventId)) {
+            if (!Objects.equals(event.getId(), eventId)) {
                 index++;
             } else {
                 tempEvents.remove(index);
@@ -81,10 +81,10 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     private void validateNewCompilationDto(NewCompilationDto newCompilationDto) {
-        if (newCompilationDto.getEventIds() == null) {
+        if (newCompilationDto.getIds() == null) {
             throw new InvalidParameterException("Empty ids list");
         }
-        for (Long id : newCompilationDto.getEventIds()) {
+        for (Long id : newCompilationDto.getIds()) {
             if (!eventRepository.existsById(id)) {
                 throw new CompilationNotFoundException("Compilation not found");
             }
@@ -109,7 +109,7 @@ public class CompilationServiceImpl implements CompilationService {
     private void checkIfEventInCompilation(Long compilationId, Long eventId) {
         List<Long> ids = new ArrayList<>();
         for (Event event : compilationRepository.getReferenceById(compilationId).getEvents()) {
-            ids.add(event.getEventId());
+            ids.add(event.getId());
         }
         if (!ids.contains(eventId)) {
             throw new EventNotFoundException("Event not in compilation");

@@ -13,7 +13,7 @@ public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "compilation_id")
-    private Long compilationId;
+    private Long id;
 
     @OneToMany
     private List<Event> events;

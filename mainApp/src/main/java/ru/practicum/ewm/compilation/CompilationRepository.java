@@ -9,5 +9,5 @@ import java.util.List;
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
     @Query("SELECT c FROM Compilation c WHERE c.pinned = ?1")
-    List<Compilation> findAllComtilationsByPinnedState(Boolean pinned, Pageable pageable);
+    List<Compilation> findAllCompilationsByPinnedState(Boolean pinned, Pageable pageable);
 }
