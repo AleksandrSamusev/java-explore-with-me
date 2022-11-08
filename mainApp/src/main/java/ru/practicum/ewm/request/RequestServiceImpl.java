@@ -1,6 +1,7 @@
 package ru.practicum.ewm.request;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.event.EventState;
 import ru.practicum.ewm.exception.EventNotFoundException;
@@ -48,10 +49,16 @@ public class RequestServiceImpl implements RequestService {
         } else if (!eventRepository.getReferenceById(eventId).getRequestModeration()) {
             Request request = requestRepository.findAllPendingRequestsByEventIdAndUserId(userId, eventId).get(0);
             request.setStatus(RequestStatus.CONFIRMED);
+            Event temp = eventRepository.getReferenceById(eventId);
+            temp.setConfirmedRequests(temp.getConfirmedRequests() + 1L);
+            eventRepository.save(temp);
             return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
         }
         Request request = requestRepository.findAllPendingRequestsByEventIdAndUserId(userId, eventId).get(0);
         request.setStatus(RequestStatus.CONFIRMED);
+        Event temp = eventRepository.getReferenceById(eventId);
+        temp.setConfirmedRequests(temp.getConfirmedRequests() + 1L);
+        eventRepository.save(temp);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
