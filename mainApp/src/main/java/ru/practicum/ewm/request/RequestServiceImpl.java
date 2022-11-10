@@ -39,7 +39,7 @@ public class RequestServiceImpl implements RequestService {
                 throw new InvalidParameterException("Denied. Request already created");
             }
         }
-        if (Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getUserId(), userId)) {
+        if (Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getId(), userId)) {
             throw new InvalidParameterException("Denied. Can't be requested by initiator");
         } else if (!eventRepository.getReferenceById(eventId).getState().equals(EventState.PUBLISHED)) {
             throw new InvalidParameterException("Denied. Event is not published");

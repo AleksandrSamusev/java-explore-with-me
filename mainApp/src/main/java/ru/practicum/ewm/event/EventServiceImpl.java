@@ -1,34 +1,39 @@
 package ru.practicum.ewm.event;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.CategoryMapper;
+import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.UserMapper;
 import ru.practicum.ewm.user.UserRepository;
+import ru.practicum.stat.model.EndpointHit;
+import ru.practicum.stat.model.ViewStats;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final StatsClient statsClient;
 
-    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository) {
+    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository, StatsClient client, StatsClient statsClient) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.requestRepository = requestRepository;
+        this.statsClient = statsClient;
     }
 
     public List<EventShortDto> findAllUsersEvents(Long userId, Integer from, Integer size) {
@@ -231,35 +236,72 @@ public class EventServiceImpl implements EventService {
 
     public List<EventShortDto> getSortedEvents(String text, List<Integer> categories, Boolean paid,
                                                String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                               String sort, Integer from, Integer size) {
+                                               String sort, Integer from, Integer size, HttpServletRequest request) {
         LocalDateTime start;
         LocalDateTime end;
+        String sorting = "";
+        String availableCondition;
 
-        if (rangeStart == null) {
+        if (rangeStart != null && rangeEnd != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            start = LocalDateTime.parse(rangeStart, formatter);
+            end = LocalDateTime.parse(rangeEnd, formatter);
+        } else {
             start = LocalDateTime.now();
+            end = LocalDateTime.now().plusYears(100);
+        }
+        if (sort.equals(EventSortType.EVENT_DATE.toString())) {
+            sorting = "eventDate";
+        } else if (sort.equals(EventSortType.VIEWS.toString())) {
+            sorting = "views";
+        }
+        if (onlyAvailable.equals(false)) {
+            availableCondition = "";
         } else {
-            start = LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            availableCondition = "e.confirmedRequests < e.participantLimit";
         }
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
 
-        if (rangeEnd == null) {
-            end = LocalDateTime.now().plusYears(10);
-        } else {
-            end = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
+        List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
+                paid, start, end, availableCondition, pageable);
 
-        var events = eventRepository.getFilteredEvents(text, categories, paid, start, end,
-                onlyAvailable, from, size);
-
-        if (sort != null) {
-            if (sort.equals(EventSortType.EVENT_DATE)) {
-                events.stream().sorted(Comparator.comparing(Event::getEventDate));
+        sortedEvents.forEach(e -> {
+            List<ViewStats> stats = statsClient.stats(start,
+                    end,
+                    List.of(String.format("/events/%s", e.getId())),
+                    false);
+            if (stats.isEmpty()) {
+                e.setViews(0);
+            } else {
+                e.setViews(stats.get(0).getHits());
             }
-            if (sort.equals(EventSortType.VIEWS)) {
-                events.stream().sorted(Comparator.comparing(Event::getEventDate));
-            }
-        }
+        });
+        saveStatistics(request);
+        return EventMapper.toEventShortDtos(sortedEvents);
 
+    }
+
+    @Override
+    public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new EventNotFoundException("Event not found"));
+
+        List<String> uris = List.of(request.getRequestURI());
+        List<ViewStats> stats = statsClient.stats(LocalDateTime.now(), LocalDateTime.now(), uris, true);
+        int hits = stats.stream()
+                .filter(s -> s.getApp().equals("mainApp"))
+                .map(ViewStats::getHits).mapToInt(Integer::intValue).sum();
+        event.setViews(hits);
+        saveStatistics(request);
+        return EventMapper.toEventFullDto(event);
+    }
+
+    private void saveStatistics(HttpServletRequest request) {
+        EndpointHit endpointHit = new EndpointHit();
+        endpointHit.setApp("mainApp");
+        endpointHit.setUri(request.getRemoteAddr());
+        endpointHit.setIp(request.getRequestURI());
+        endpointHit.setTimestamp(String.valueOf(LocalDateTime.now()));
+        statsClient.hit(endpointHit);
     }
 }

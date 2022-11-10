@@ -15,4 +15,6 @@ public class EndpointHitDto {
     String uri;
     String ip;
     String timestamp;
+
+
 }

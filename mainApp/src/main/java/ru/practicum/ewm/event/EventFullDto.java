@@ -30,7 +30,6 @@ public class EventFullDto {
     private LocalDateTime publishedOn;
     private Boolean requestModeration;
     private EventState state = EventState.PENDING;
-    ;
     private String title;
     private Integer views;
 }

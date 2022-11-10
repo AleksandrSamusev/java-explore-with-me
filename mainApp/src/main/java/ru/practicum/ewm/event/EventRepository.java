@@ -29,7 +29,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE" +
             " (upper(e.annotation) like upper(CONCAT('%',:text,'%')) or upper(e.description)" +
             " like upper(CONCAT('%',:text,'%')) or :text is null) and e.category IN :categories and" +
-            " e.paid = :paid and ")
-    void getFilteredEvents(String text, List<Integer> categories, Boolean paid,
-                           LocalDateTime start, LocalDateTime end, Boolean onlyAvailable);
+            " e.paid = :paid and e.eventDate > :start and e.eventDate < :end and :availableCondition ")
+    List<Event> getFilteredEvents(String text, List<Integer> categories,
+                                  Boolean paid, LocalDateTime start, LocalDateTime end, String availableCondition,
+                                  Pageable pageable);
 }
