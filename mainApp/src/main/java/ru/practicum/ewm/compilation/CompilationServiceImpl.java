@@ -26,8 +26,12 @@ public class CompilationServiceImpl implements CompilationService {
 
     public List<CompilationDto> findCompilationsByPinned(Boolean pinned, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
-        return CompilationMapper.toCompilationDtos(compilationRepository
-                .findAllCompilationsByPinnedState(pinned, pageable));
+        if (pinned != null) {
+            return CompilationMapper.toCompilationDtos(compilationRepository
+                    .findAllCompilationsByPinnedState(pinned, pageable));
+        } else {
+            return CompilationMapper.toCompilationDtos(compilationRepository.findAll());
+        }
     }
 
     public CompilationDto findCompilationByCompilationId(Long compilationId) {
@@ -53,12 +57,10 @@ public class CompilationServiceImpl implements CompilationService {
         checkIfEventInCompilation(compilationId, eventId);
         Compilation tempCompilation = compilationRepository.getReferenceById(compilationId);
         List<Event> tempEvents = tempCompilation.getEvents();
-        int index = 0;
-        for (Event event : tempEvents) {
-            if (!Objects.equals(event.getId(), eventId)) {
-                index++;
-            } else {
-                tempEvents.remove(index);
+        for (int i = 0; i < tempEvents.size(); i++) {
+            Event event = tempEvents.get(i);
+            if (Objects.equals(event.getId(), eventId)) {
+                tempEvents.remove(i);
             }
         }
         tempCompilation.setEvents(tempEvents);

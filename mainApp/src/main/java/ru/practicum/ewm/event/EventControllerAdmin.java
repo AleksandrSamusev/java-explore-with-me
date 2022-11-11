@@ -18,14 +18,14 @@ public class EventControllerAdmin {
     }
 
     @GetMapping
-    public List<EventFullDto> findAllUsersEventsFull(@RequestParam List<Long> ids,
-                                                     @RequestParam List<String> states,
-                                                     @RequestParam List<String> categories,
+    public List<EventFullDto> findAllUsersEventsFull(@RequestParam List<Long> users,
+                                                     @RequestParam List<EventState> states,
+                                                     @RequestParam List<Long> categories,
                                                      @RequestParam String rangeStart,
                                                      @RequestParam String rangeEnd,
                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
                                                      @RequestParam(required = false, defaultValue = "10") Integer size) {
-        return eventService.findAllUsersEventsFull(ids, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.findAllUsersEventsFull(users, states, categories, rangeStart, rangeEnd, from, size);
 
     }
 

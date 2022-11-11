@@ -23,7 +23,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.initiator.id IN (?1) " +
             "AND e.category.id IN (?2) AND e.state IN (?3) " +
             "AND e.eventDate > ?4 AND e.eventDate < ?5")
-    List<Event> findAllUsersEventsFull(List<Long> ids, List<String> categories, List<String> states,
+    List<Event> findAllUsersEventsFull(List<Long> users, List<Long> categories, List<EventState> states,
                                        LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE" +

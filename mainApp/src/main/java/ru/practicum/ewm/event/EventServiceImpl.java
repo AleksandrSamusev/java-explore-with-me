@@ -144,13 +144,13 @@ public class EventServiceImpl implements EventService {
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
     }
 
-    public List<EventFullDto> findAllUsersEventsFull(List<Long> ids, List<String> states, List<String> categories,
+    public List<EventFullDto> findAllUsersEventsFull(List<Long> users, List<EventState> states, List<Long> categories,
                                                      String rangeStart, String rangeEnd, Integer from, Integer size) {
         LocalDateTime start;
         LocalDateTime end;
 
         if (rangeStart != null && rangeEnd != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             start = LocalDateTime.parse(rangeStart, formatter);
             end = LocalDateTime.parse(rangeEnd, formatter);
         } else {
@@ -159,7 +159,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
-        return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(ids, categories, states,
+        return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(users, categories, states,
                 start, end, pageable));
     }
 

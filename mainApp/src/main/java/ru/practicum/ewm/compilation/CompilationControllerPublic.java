@@ -18,7 +18,7 @@ public class CompilationControllerPublic {
     }
 
     @GetMapping
-    public List<CompilationDto> findCompilationsByPinned(@RequestParam Boolean pinned,
+    public List<CompilationDto> findCompilationsByPinned(@RequestParam(required = false) Boolean pinned,
                                                          @RequestParam(required = false,
                                                                  defaultValue = "0") Integer from,
                                                          @RequestParam(required = false,

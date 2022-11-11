@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS compilations
 
 CREATE TABLE IF NOT EXISTS compilation_events
 (
-    event_id       BIGINT REFERENCES events (event_id),
-    compilation_id BIGINT REFERENCES compilations (compilation_id)
+    CE_compilation_id BIGINT REFERENCES compilations (compilation_id),
+    CE_event_id       BIGINT REFERENCES events (event_id)
+
 );
