@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class APiError {
+public class ApiError {
     List<String> errors;
     String message;
     String reason;
