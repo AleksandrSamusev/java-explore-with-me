@@ -25,7 +25,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     public List<CompilationDto> findCompilationsByPinned(Boolean pinned, Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("compilationId"));
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
         return CompilationMapper.toCompilationDtos(compilationRepository
                 .findAllCompilationsByPinnedState(pinned, pageable));
     }
@@ -35,13 +35,11 @@ public class CompilationServiceImpl implements CompilationService {
                 .orElseThrow(() -> new CompilationNotFoundException("Compilation not found")));
     }
 
-    public NewCompilationDto createCompilation(NewCompilationDto newCompilationDto) {
-        validateNewCompilationDto(newCompilationDto);
+    public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         Compilation tempCompilation = CompilationMapper.toCompilationFromNew(newCompilationDto);
-        for (Long id : newCompilationDto.getIds()) {
-            tempCompilation.getEvents().add(eventRepository.getReferenceById(id));
-        }
-        return CompilationMapper.toNewCompilationDto(compilationRepository.save(tempCompilation));
+        List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
+        tempCompilation.setEvents(events);
+        return CompilationMapper.toCompilationDto(compilationRepository.save(tempCompilation));
     }
 
     public void deleteCompilationById(Long compilationId) {
@@ -81,10 +79,10 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     private void validateNewCompilationDto(NewCompilationDto newCompilationDto) {
-        if (newCompilationDto.getIds() == null) {
+        if (newCompilationDto.getEvents() == null) {
             throw new InvalidParameterException("Empty ids list");
         }
-        for (Long id : newCompilationDto.getIds()) {
+        for (Long id : newCompilationDto.getEvents()) {
             if (!eventRepository.existsById(id)) {
                 throw new CompilationNotFoundException("Compilation not found");
             }

@@ -7,7 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.exception.CategoryNotFoundException;
-import ru.practicum.ewm.exception.InvalidParameterException;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public List<CategoryDto> getCategories(Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("categoryId"));
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
 
         return CategoryMapper.toCategoryDtoList(categoryRepository.findAllCategories(pageable));
 
@@ -40,11 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public void deleteCategory(Long categoryId) {
-        if (eventRepository.findAllEventsByCategory(categoryId).size() == 0) {
             categoryRepository.deleteById(categoryId);
-        } else {
-            throw new InvalidParameterException("Illegal operation");
-        }
     }
 
     public CategoryDto patchCategory(CategoryDto categoryDto) {

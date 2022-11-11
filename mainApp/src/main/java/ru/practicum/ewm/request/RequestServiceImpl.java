@@ -19,7 +19,8 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
 
-    public RequestServiceImpl(RequestRepository requestRepository, UserRepository userRepository, EventRepository eventRepository) {
+    public RequestServiceImpl(RequestRepository requestRepository, UserRepository userRepository,
+                              EventRepository eventRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;

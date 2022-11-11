@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.net.http.HttpClient;
 import java.util.List;
 
 @RestController
@@ -14,8 +12,6 @@ import java.util.List;
 @RequestMapping("/events")
 public class EventControllerPublic {
 
-    private final URI uri = URI.create("${STAT_SERVER_URL} + /hit");
-    private final HttpClient client = HttpClient.newHttpClient();
     private final EventServiceImpl eventService;
 
     @Autowired

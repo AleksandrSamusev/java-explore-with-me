@@ -22,7 +22,7 @@ public class CategoryControllerAdmin {
     }
 
     @DeleteMapping("/{categoryId}")
-    public void deleteCategory(Long categoryId) {
+    public void deleteCategory(@PathVariable Long categoryId) {
         categoryService.deleteCategory(categoryId);
     }
 

@@ -16,6 +16,7 @@ public class Compilation {
     private Long id;
 
     @OneToMany
+    @JoinColumn(name = "event_id")
     private List<Event> events;
 
     @Column(name = "title", nullable = false)

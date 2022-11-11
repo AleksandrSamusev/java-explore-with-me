@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.category.id = ?1")
-    List<Event> findAllEventsByCategory(Long categoryId);
+    List<Event> findAllEventsByCategory(Long id);
 
     @Query("SELECT e FROM Event e WHERE e.initiator.id = ?1")
     List<Event> findAllEventsByUserId(Long userId, Pageable pageable);
@@ -24,13 +24,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND e.category.id IN (?2) AND e.state IN (?3) " +
             "AND e.eventDate > ?4 AND e.eventDate < ?5")
     List<Event> findAllUsersEventsFull(List<Long> ids, List<String> categories, List<String> states,
-                                       String rangeStart, String rangeEnd, Pageable pageable);
+                                       LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE" +
             " (upper(e.annotation) like upper(CONCAT('%',:text,'%')) or upper(e.description)" +
             " like upper(CONCAT('%',:text,'%')) or :text is null) and e.category IN :categories and" +
-            " e.paid = :paid and e.eventDate > :start and e.eventDate < :end and :availableCondition ")
+            " e.paid = :paid and e.eventDate > :start and e.eventDate < :end")
     List<Event> getFilteredEvents(String text, List<Integer> categories,
-                                  Boolean paid, LocalDateTime start, LocalDateTime end, String availableCondition,
+                                  Boolean paid, LocalDateTime start, LocalDateTime end,
                                   Pageable pageable);
 }

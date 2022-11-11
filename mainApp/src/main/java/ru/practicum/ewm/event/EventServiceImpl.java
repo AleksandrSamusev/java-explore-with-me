@@ -5,13 +5,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryMapper;
+import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.request.*;
-import ru.practicum.ewm.user.UserMapper;
+import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
 import ru.practicum.stat.model.EndpointHit;
 import ru.practicum.stat.model.ViewStats;
@@ -27,80 +29,63 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final CategoryRepository categoryRepository;
     private final StatsClient statsClient;
 
-    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository, StatsClient client, StatsClient statsClient) {
+    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
+                            RequestRepository requestRepository, CategoryRepository categoryRepository, StatsClient statsClient) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.requestRepository = requestRepository;
+        this.categoryRepository = categoryRepository;
         this.statsClient = statsClient;
     }
 
     public List<EventShortDto> findAllUsersEvents(Long userId, Integer from, Integer size) {
         validateUserId(userId);
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("eventId"));
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
         return EventMapper.toEventShortDtos(eventRepository.findAllEventsByUserId(userId, pageable));
     }
 
-    public EventFullDto createEvent(Long userId, EventFullDto eventFullDto) {
-        validateUserId(userId);
-        validateEventFullDto(eventFullDto);
-        return EventMapper.toEventFullDto(eventRepository.save(EventMapper.toEvent(eventFullDto)));
+    public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
+        User user = userRepository.getReferenceById(userId);
+        Category category = categoryRepository.getReferenceById(newEventDto.getCategory());
+        Event event = EventMapper.toEventFromNewEventDto(newEventDto);
+        event.setInitiator(user);
+        event.setCategory(category);
+        event.setAvailable(true);
+        Event saved = eventRepository.save(event);
+        return EventMapper.toEventFullDto(saved);
     }
 
-    public EventFullDto patchEvent(Long userId, EventFullDto eventFullDto) {
-        if (!eventFullDto.getState().equals(EventState.PUBLISHED)) {
-            validateUserId(userId);
-            validateEventFullDto(eventFullDto);
-            Event temp = eventRepository.findById(eventFullDto.getEventId())
-                    .orElseThrow(() -> new EventNotFoundException("Event not found"));
-            if (eventFullDto.getEventDate() != null) {
-                temp.setEventDate(eventFullDto.getEventDate());
-            }
-            if (eventFullDto.getPaid() != null) {
-                temp.setPaid(eventFullDto.getPaid());
-            }
-            if (eventFullDto.getCategoryDto() != null) {
-                temp.setCategory(CategoryMapper.toCategory(eventFullDto.getCategoryDto()));
-            }
-            if (eventFullDto.getAnnotation() != null) {
-                temp.setAnnotation(eventFullDto.getAnnotation());
-            }
-            if (eventFullDto.getConfirmedRequests() != null) {
-                temp.setConfirmedRequests(eventFullDto.getConfirmedRequests());
-            }
-            if (eventFullDto.getDescription() != null) {
-                temp.setDescription(eventFullDto.getDescription());
-            }
-            temp.setRequestModeration(eventFullDto.getRequestModeration());
-            temp.setCreatedOn(LocalDateTime.now());
-            if (eventFullDto.getInitiator() != null) {
-                temp.setInitiator(UserMapper.toUserFromShortDto(eventFullDto.getInitiator()));
-            }
-            if (eventFullDto.getLocation() != null) {
-                temp.setLocation(eventFullDto.getLocation());
-            }
-            if (eventFullDto.getParticipantLimit() != null) {
-                temp.setParticipantLimit(eventFullDto.getParticipantLimit());
-            }
-            if (eventFullDto.getPublishedOn() != null) {
-                temp.setPublishedOn(eventFullDto.getPublishedOn());
-            }
-            if (eventFullDto.getTitle() != null) {
-                temp.setTitle(eventFullDto.getTitle());
-            }
-            if (eventFullDto.getViews() != null) {
-                temp.setViews(eventFullDto.getViews());
-            }
-            if (eventFullDto.getState().equals(EventState.CANCELLED)) {
-                temp.setState(EventState.PENDING);
-            } else {
-                temp.setState(eventFullDto.getState());
-            }
-            return EventMapper.toEventFullDto(eventRepository.save(temp));
-        } else {
-            throw new InvalidParameterException("Denied. Event is already published.");
+    public EventFullDto patchEvent(Long userId, UpdateEventRequest updateEventRequest) {
+        validateUserId(userId);
+        Event temp = eventRepository.findById(updateEventRequest.getEventId())
+                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+        if (updateEventRequest.getEventDate() != null) {
+            temp.setEventDate(updateEventRequest.getEventDate());
         }
+        if (updateEventRequest.getPaid() != null) {
+            temp.setPaid(updateEventRequest.getPaid());
+        }
+        if (updateEventRequest.getCategoryId() != null) {
+            temp.setCategory(categoryRepository.getReferenceById(updateEventRequest.getCategoryId()));
+        }
+        if (updateEventRequest.getAnnotation() != null) {
+            temp.setAnnotation(updateEventRequest.getAnnotation());
+        }
+        if (updateEventRequest.getDescription() != null) {
+            temp.setDescription(updateEventRequest.getDescription());
+        }
+
+        if (updateEventRequest.getParticipantLimit() != null) {
+            temp.setParticipantLimit(updateEventRequest.getParticipantLimit());
+        }
+
+        if (updateEventRequest.getTitle() != null) {
+            temp.setTitle(updateEventRequest.getTitle());
+        }
+        return EventMapper.toEventFullDto(eventRepository.save(temp));
     }
 
     public EventFullDto findEventByUserIdAndEventId(Long userId, Long eventId) {
@@ -161,9 +146,21 @@ public class EventServiceImpl implements EventService {
 
     public List<EventFullDto> findAllUsersEventsFull(List<Long> ids, List<String> states, List<String> categories,
                                                      String rangeStart, String rangeEnd, Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by("eventId"));
+        LocalDateTime start;
+        LocalDateTime end;
+
+        if (rangeStart != null && rangeEnd != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            start = LocalDateTime.parse(rangeStart, formatter);
+            end = LocalDateTime.parse(rangeEnd, formatter);
+        } else {
+            start = LocalDateTime.now();
+            end = LocalDateTime.now().plusYears(100);
+        }
+
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
         return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(ids, categories, states,
-                rangeStart, rangeEnd, pageable));
+                start, end, pageable));
     }
 
     public EventFullDto changeEvent(Long eventId, EventFullDto eventFullDto) {
@@ -172,7 +169,8 @@ public class EventServiceImpl implements EventService {
         temp.setCategory(CategoryMapper.toCategory(eventFullDto.getCategoryDto()));
         temp.setDescription(eventFullDto.getDescription());
         temp.setEventDate(eventFullDto.getEventDate());
-        temp.setLocation(eventFullDto.getLocation());
+        temp.setLat(eventFullDto.getLocation().getLat());
+        temp.setLon(eventFullDto.getLocation().getLon());
         temp.setPaid(eventFullDto.getPaid());
         temp.setParticipantLimit(eventFullDto.getParticipantLimit());
         temp.setRequestModeration(eventFullDto.getRequestModeration());
@@ -214,14 +212,20 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    private void validateUpdateEventRequest(UpdateEventRequest updateEventRequest) {
+        if (!eventRepository.existsById(updateEventRequest.getEventId())) {
+            throw new EventNotFoundException("Event not found");
+        }
+    }
+
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User not found");
         }
     }
 
-    private void validateEventFullDto(EventFullDto eventFullDto) {
-        if (eventFullDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2L))) {
+    private void validateNewEventDto(NewEventDto newEventDto) {
+        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2L))) {
             throw new InvalidParameterException("Denied. Less then 2hrs before the event.");
         }
     }
@@ -263,7 +267,7 @@ public class EventServiceImpl implements EventService {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
 
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
-                paid, start, end, availableCondition, pageable);
+                paid, start, end, pageable);
 
         sortedEvents.forEach(e -> {
             List<ViewStats> stats = statsClient.stats(start,

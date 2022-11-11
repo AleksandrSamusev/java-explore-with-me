@@ -2,7 +2,6 @@ package ru.practicum.ewm.event;
 
 import lombok.Data;
 import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.location.Location;
 import ru.practicum.ewm.user.User;
 
 import javax.persistence.*;
@@ -23,8 +22,8 @@ public class Event {
     @Column(name = "confirmed_requests")
     private Long confirmedRequests;
 
-    @ManyToOne
-    @JoinColumn(name = "categoty_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @Column(name = "description", nullable = false)
@@ -33,14 +32,11 @@ public class Event {
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
-
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
-
+    private Double Lat;
+    private Double Lon;
     @Column(name = "paid", nullable = false)
     private Boolean paid;
 
@@ -51,19 +47,22 @@ public class Event {
     private LocalDateTime publishedOn;
 
     @Column(name = "created_on", nullable = false)
-    private LocalDateTime createdOn = LocalDateTime.now();
+    private LocalDateTime createdOn;
 
     @Column(name = "request_moderation", nullable = false)
     private Boolean requestModeration;
 
     @Column(name = "state", nullable = false)
     @Enumerated(EnumType.STRING)
-    private EventState state = EventState.PENDING;
+    private EventState state;
 
     @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "views", nullable = false)
     private Integer views;
+
+    @Column(name = "available")
+    private Boolean available;
 
 }

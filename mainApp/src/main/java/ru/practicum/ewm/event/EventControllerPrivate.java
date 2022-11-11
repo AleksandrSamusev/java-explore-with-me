@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@RequestMapping("/user/{userId}/events")
+@RequestMapping("/users/{userId}/events")
 public class EventControllerPrivate {
     private final EventServiceImpl eventService;
 
@@ -27,14 +27,14 @@ public class EventControllerPrivate {
 
     @PostMapping
     public EventFullDto createEvent(@PathVariable Long userId,
-                                    @RequestBody EventFullDto eventFullDto) {
-        return eventService.createEvent(userId, eventFullDto);
+                                    @RequestBody NewEventDto newEventDto) {
+        return eventService.createEvent(userId, newEventDto);
     }
 
     @PatchMapping
     public EventFullDto patchEvent(@PathVariable Long userId,
-                                   @RequestBody EventFullDto eventFullDto) {
-        return eventService.patchEvent(userId, eventFullDto);
+                                   @RequestBody UpdateEventRequest updateEventRequest) {
+        return eventService.patchEvent(userId, updateEventRequest);
     }
 
     @GetMapping("/{eventId}")

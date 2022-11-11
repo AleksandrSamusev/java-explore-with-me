@@ -16,7 +16,7 @@ public class CompilationControllerAdmin {
     }
 
     @PostMapping
-    public NewCompilationDto createCompilation(@RequestBody NewCompilationDto newCompilationDto) {
+    public CompilationDto createCompilation(@RequestBody NewCompilationDto newCompilationDto) {
         return compilationService.createCompilation(newCompilationDto);
     }
 

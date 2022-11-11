@@ -18,6 +18,6 @@ public class UpdateEventRequest {
     private LocalDateTime eventDate;
     private Long eventId;
     private Boolean paid;
-    private Long participantLimit;
+    private Integer participantLimit;
     private String title;
 }

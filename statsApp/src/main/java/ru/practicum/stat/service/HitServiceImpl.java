@@ -29,12 +29,12 @@ public class HitServiceImpl implements HitService {
             if (unique == null) {
                 return hitRepository.findAllHitsBetweenDates(start, end);
             } else {
-                return hitRepository.findAllHitsBetweenDatesUnique(start, end, unique);
+                return hitRepository.findAllHitsBetweenDatesUnique(start, end);
             }
         }
         if (unique == null) {
             return hitRepository.findAllHitsBetweenDatesByUris(start, end, uris);
         }
-        return hitRepository.findAllHitsBetweenDatesByUrisAndUnique(start, end, uris, unique);
+        return hitRepository.findAllHitsBetweenDatesByUrisAndUnique(start, end, uris);
     }
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.ewm.category.CategoryDto;
 import ru.practicum.ewm.user.UserShortDto;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,14 +16,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventShortDto {
-
+    @NotNull
     private String annotation;
-    private CategoryDto categoryDto;
+    @NotNull
+    private CategoryDto category;
     private Long confirmedRequests;
+    @NotNull
     private LocalDateTime eventDate;
-    private Long eventId;
+    private Long id;
+    @NotNull
     private UserShortDto initiator;
+    @NotNull
     private boolean paid;
+    @NotNull
     private String title;
     private Integer views;
 

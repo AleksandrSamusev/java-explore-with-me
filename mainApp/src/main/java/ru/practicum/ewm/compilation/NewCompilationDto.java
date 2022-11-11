@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -12,7 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NewCompilationDto {
-    private List<Long> ids;
+    private List<Long> events;
+    @NotNull
     private String title;
     private Boolean pinned;
 }

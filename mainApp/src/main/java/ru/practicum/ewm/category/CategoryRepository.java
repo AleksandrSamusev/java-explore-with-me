@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Query("SELECT c FROM Category c")
+    @Query("SELECT c FROM Category c where c.id > 0")
     List<Category> findAllCategories(Pageable pageable);
 }
