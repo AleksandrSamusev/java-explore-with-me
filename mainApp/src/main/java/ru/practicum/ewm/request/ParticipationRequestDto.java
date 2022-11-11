@@ -1,5 +1,6 @@
 package ru.practicum.ewm.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,12 +16,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ParticipationRequestDto {
-    private Long requestId;
+    private Long id;
     @NotNull
-    private Long eventId;
-    private LocalDateTime created = LocalDateTime.now();
+    private Long event;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime created;
     @NotNull
-    private Long requesterId;
+    private Long requester;
     @Enumerated(EnumType.STRING)
     private RequestStatus status = RequestStatus.PENDING;
 

@@ -166,7 +166,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto changeEvent(Long eventId, EventFullDto eventFullDto) {
         Event temp = eventRepository.getReferenceById(eventId);
         temp.setAnnotation(eventFullDto.getAnnotation());
-        temp.setCategory(CategoryMapper.toCategory(eventFullDto.getCategoryDto()));
+        temp.setCategory(CategoryMapper.toCategory(eventFullDto.getCategory()));
         temp.setDescription(eventFullDto.getDescription());
         temp.setEventDate(eventFullDto.getEventDate());
         temp.setLat(eventFullDto.getLocation().getLat());

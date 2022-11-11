@@ -1,24 +1,17 @@
-package ru.practicum.ewm.compilation;
+package ru.practicum.ewm.category;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.event.EventShortDto;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CompilationDto {
+public class NewCategoryDto {
     @NotNull
-    private Long id;
-    @NotNull
-    private String title;
-    @NotNull
-    private Boolean pinned;
-    private List<EventShortDto> events;
+    private String name;
 }

@@ -13,10 +13,10 @@ import java.util.List;
 public class EventMapper {
     public static Event toEvent(EventFullDto eventFullDto) {
         Event event = new Event();
-        event.setId(eventFullDto.getEventId());
+        event.setId(eventFullDto.getId());
         event.setEventDate(eventFullDto.getEventDate());
         event.setAnnotation(eventFullDto.getAnnotation());
-        event.setCategory(CategoryMapper.toCategory(eventFullDto.getCategoryDto()));
+        event.setCategory(CategoryMapper.toCategory(eventFullDto.getCategory()));
         event.setPaid(eventFullDto.getPaid());
         event.setDescription(eventFullDto.getDescription());
         event.setConfirmedRequests(eventFullDto.getConfirmedRequests());
@@ -35,10 +35,10 @@ public class EventMapper {
 
     public static EventFullDto toEventFullDto(Event event) {
         EventFullDto eventFullDto = new EventFullDto();
-        eventFullDto.setEventId(event.getId());
+        eventFullDto.setId(event.getId());
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setAnnotation(event.getAnnotation());
-        eventFullDto.setCategoryDto(CategoryMapper.toCategoryDto(event.getCategory()));
+        eventFullDto.setCategory(CategoryMapper.toCategoryDto(event.getCategory()));
         eventFullDto.setPaid(event.getPaid());
         eventFullDto.setDescription(event.getDescription());
         eventFullDto.setConfirmedRequests(event.getConfirmedRequests());

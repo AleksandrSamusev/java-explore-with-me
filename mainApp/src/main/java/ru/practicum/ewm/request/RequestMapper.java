@@ -9,21 +9,21 @@ import java.util.List;
 public class RequestMapper {
     public static Request toRequest(ParticipationRequestDto participationRequestDto) {
         Request request = new Request();
-        request.setRequesterId(participationRequestDto.getRequesterId());
-        request.setId(participationRequestDto.getRequestId());
+        request.setRequesterId(participationRequestDto.getRequester());
+        request.setId(participationRequestDto.getId());
         request.setCreated(participationRequestDto.getCreated());
-        request.setEventId(participationRequestDto.getEventId());
+        request.setEventId(participationRequestDto.getEvent());
         request.setStatus(participationRequestDto.getStatus());
         return request;
     }
 
     public static ParticipationRequestDto toParticipationRequestDto(Request request) {
         ParticipationRequestDto participationRequestDto = new ParticipationRequestDto();
-        participationRequestDto.setRequesterId(request.getRequesterId());
+        participationRequestDto.setRequester(request.getRequesterId());
         participationRequestDto.setStatus(request.getStatus());
         participationRequestDto.setCreated(request.getCreated());
-        participationRequestDto.setRequestId(request.getId());
-        participationRequestDto.setEventId(request.getEventId());
+        participationRequestDto.setId(request.getId());
+        participationRequestDto.setEvent(request.getEventId());
         return participationRequestDto;
     }
 

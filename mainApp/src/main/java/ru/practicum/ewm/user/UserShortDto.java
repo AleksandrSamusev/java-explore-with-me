@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserShortDto {
+    @NotNull
     private Long id;
     @NotNull
     private String name;

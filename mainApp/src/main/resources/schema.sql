@@ -44,8 +44,8 @@ CREATE TABLE IF NOT EXISTS events
     state              text CHECK (state IN ('PUBLISHED', 'PENDING', 'CANCELED')) NOT NULL,
     title              text                                                       NOT NULL,
     available          boolean,
-    lat                DOUBLE PRECISION,
-    lon                DOUBLE PRECISION,
+    lat                float,
+    lon                float,
     views              BIGINT
 );
 

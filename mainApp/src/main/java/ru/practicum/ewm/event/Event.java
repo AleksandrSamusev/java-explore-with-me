@@ -65,4 +65,5 @@ public class Event {
     @Column(name = "available")
     private Boolean available;
 
+
 }
