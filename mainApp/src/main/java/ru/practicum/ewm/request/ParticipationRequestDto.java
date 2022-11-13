@@ -19,12 +19,12 @@ public class ParticipationRequestDto {
     private Long id;
     @NotNull
     private Long event;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss:SSS")
     private LocalDateTime created;
     @NotNull
     private Long requester;
     @Enumerated(EnumType.STRING)
-    private RequestStatus status = RequestStatus.PENDING;
+    private RequestStatus status;
 
 
 }

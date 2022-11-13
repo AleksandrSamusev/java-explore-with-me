@@ -24,7 +24,7 @@ public class RequestControllerPrivate {
 
     @PostMapping
     public ParticipationRequestDto createRequestFromCurrentUser(@PathVariable Long userId,
-                                                                Long eventId) {
+                                                                @RequestParam Long eventId) {
         return requestService.createRequestFromCurrentUser(userId, eventId);
     }
 

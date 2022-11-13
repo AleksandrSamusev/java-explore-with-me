@@ -121,15 +121,18 @@ public class EventServiceImpl implements EventService {
         Event tempEvent = eventRepository.getReferenceById(eventId);
         if (tempEvent.getParticipantLimit() == 0 || !tempEvent.getRequestModeration()) {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
+            tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
+            eventRepository.save(tempEvent);
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                 == tempEvent.getParticipantLimit()) {
             throw new InvalidParameterException("Denied. Participants limit reached");
-        } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
-                == tempEvent.getParticipantLimit() - 1) {
+        } else {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
+            tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
+            eventRepository.save(tempEvent);
             List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
             for (Request request : pendingRequests) {
-                requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.CANCELLED);
+                requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.CONFIRMED);
             }
         }
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));

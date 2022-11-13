@@ -10,8 +10,8 @@ import ru.practicum.ewm.exception.RequestNotFoundException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class RequestServiceImpl implements RequestService {
@@ -36,31 +36,35 @@ public class RequestServiceImpl implements RequestService {
         validateEventId(eventId);
         List<Request> usersRequests = requestRepository.findAllRequestsByUserId(userId);
         for (Request request : usersRequests) {
-            if (Objects.equals(request.getEventId(), eventId)) {
+            if (request.getEventId().equals(eventId) && (request.getStatus().equals(RequestStatus.PENDING) ||
+                    (request.getStatus().equals(RequestStatus.CONFIRMED)))) {
                 throw new InvalidParameterException("Denied. Request already created");
             }
         }
-        if (Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getId(), userId)) {
-            throw new InvalidParameterException("Denied. Can't be requested by initiator");
+        if (eventRepository.getReferenceById(eventId).getInitiator().getId().equals(userId)) {
+            throw new InvalidParameterException("Denied. Can't be requested by initiator of the event");
         } else if (!eventRepository.getReferenceById(eventId).getState().equals(EventState.PUBLISHED)) {
-            throw new InvalidParameterException("Denied. Event is not published");
-        } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size() ==
-                eventRepository.getReferenceById(eventId).getParticipantLimit()) {
+            throw new InvalidParameterException("Denied. Event is not published yet");
+        } else if (eventRepository.getReferenceById(eventId).getRequestModeration() &&
+                requestRepository.findAllConfirmedRequestsByEventId(eventId).size() ==
+                        eventRepository.getReferenceById(eventId).getParticipantLimit()) {
             throw new InvalidParameterException("Denied. Participants limit reached.");
-        } else if (!eventRepository.getReferenceById(eventId).getRequestModeration()) {
-            Request request = requestRepository.findAllPendingRequestsByEventIdAndUserId(userId, eventId).get(0);
-            request.setStatus(RequestStatus.CONFIRMED);
-            Event temp = eventRepository.getReferenceById(eventId);
-            temp.setConfirmedRequests(temp.getConfirmedRequests() + 1L);
-            eventRepository.save(temp);
+        } else {
+
+            Request request = new Request();
+            request.setRequesterId(userId);
+            request.setCreated(LocalDateTime.now());
+            request.setEventId(eventId);
+            if (eventRepository.getReferenceById(eventId).getRequestModeration().equals(Boolean.TRUE)) {
+                request.setStatus(RequestStatus.PENDING);
+            } else {
+                request.setStatus(RequestStatus.CONFIRMED);
+                Event eventForSave = eventRepository.getReferenceById(eventId);
+                eventForSave.setConfirmedRequests(eventForSave.getConfirmedRequests() + 1);
+                eventRepository.save(eventForSave);
+            }
             return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
         }
-        Request request = requestRepository.findAllPendingRequestsByEventIdAndUserId(userId, eventId).get(0);
-        request.setStatus(RequestStatus.CONFIRMED);
-        Event temp = eventRepository.getReferenceById(eventId);
-        temp.setConfirmedRequests(temp.getConfirmedRequests() + 1L);
-        eventRepository.save(temp);
-        return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
     public ParticipationRequestDto cancelOwnRequest(Long userId, Long requestId) {

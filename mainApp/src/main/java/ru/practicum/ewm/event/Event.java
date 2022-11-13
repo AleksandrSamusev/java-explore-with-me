@@ -22,7 +22,7 @@ public class Event {
     private String annotation;
 
     @Column(name = "confirmed_requests")
-    private Long confirmedRequests;
+    private long confirmedRequests;
 
     @OneToOne
     @JoinColumn(name = "category_id", nullable = false)
@@ -66,6 +66,7 @@ public class Event {
 
     @Column(name = "available")
     private Boolean available;
+
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "events")
     private List<Compilation> compilations;
