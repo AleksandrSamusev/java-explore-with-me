@@ -8,9 +8,9 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - stats.server.url=http://localhost:9090
-      - spring.datasource.url=jdbc:postgresql://localhost:5432/ewm
-
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+      - POSTGRES_USER=shareit
+      - POSTGRES_PASSWORD=shareit
 
   ewm-db:
     image: postgres:14-alpine
@@ -20,9 +20,9 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=ewm
-      - POSTGRES_USER=shareit
-      - POSTGRES_PASSWORD=shareit
+      POSTGRES_DB: "ewm"
+      POSTGRES_USER: "shareit"
+      POSTGRES_PASSWORD: "shareit"
 
   statsapp:
     build: ./statsapp
@@ -32,7 +32,9 @@ services:
     depends_on:
       - stats-db
     environment:
-      - spring.datasource.url=jdbc:postgresql://localhost:5432/stats
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
+      - POSTGRES_USER=shareit
+      - POSTGRES_PASSWORD=shareit
 
   stats-db:
     image: postgres:14-alpine
@@ -42,6 +44,6 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=shareit
-      - POSTGRES_PASSWORD=shareit
+      POSTGRES_DB: "stats"
+      POSTGRES_USER: "shareit"
+      POSTGRES_PASSWORD: "shareit"
