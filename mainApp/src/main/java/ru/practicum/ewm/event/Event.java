@@ -37,8 +37,8 @@ public class Event {
     @OneToOne
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
-    private Float Lat;
-    private Float Lon;
+    private Float lat;
+    private Float lon;
     @Column(name = "paid", nullable = false)
     private Boolean paid;
 
