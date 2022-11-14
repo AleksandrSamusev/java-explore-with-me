@@ -1,3 +1,3 @@
 FROM amazoncorretto:11
-COPY target/*.jar mainApp.jar
-ENTRYPOINT ["java","-jar","mainApp.jar"]
+COPY target/*.jar mainapp.jar
+ENTRYPOINT ["java","-jar","mainapp.jar"]
