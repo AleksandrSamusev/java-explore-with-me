@@ -7,10 +7,12 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
+      - statsapp
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
       - POSTGRES_USER=shareit
       - POSTGRES_PASSWORD=shareit
+      - STATS_SERVER_URL=http://statsapp:9090
 
   ewm-db:
     image: postgres:14-alpine
