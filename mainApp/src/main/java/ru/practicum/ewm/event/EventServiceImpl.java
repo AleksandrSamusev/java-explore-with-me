@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryMapper;
 import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.exception.EventNotFoundException;
@@ -15,12 +15,12 @@ import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
-import ru.practicum.stat.model.EndpointHit;
-import ru.practicum.stat.model.ViewStats;
+import ru.practicum.stat.dto.EndpointHitDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
@@ -33,12 +33,14 @@ public class EventServiceImpl implements EventService {
     private final StatsClient statsClient;
 
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
-                            RequestRepository requestRepository, CategoryRepository categoryRepository, StatsClient statsClient) {
+                            RequestRepository requestRepository, CategoryRepository categoryRepository,
+                            StatsClient statsClient) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.requestRepository = requestRepository;
         this.categoryRepository = categoryRepository;
         this.statsClient = statsClient;
+        ;
     }
 
     public List<EventShortDto> findAllUsersEvents(Long userId, Integer from, Integer size) {
@@ -99,7 +101,7 @@ public class EventServiceImpl implements EventService {
         validateEventId(eventId);
         EventFullDto temp = EventMapper.toEventFullDto(eventRepository.findEventByUserIdAAndEventId(userId, eventId));
         if (temp.getState().equals(EventState.PENDING)) {
-            temp.setState(EventState.CANCELLED);
+            temp.setState(EventState.CANCELED);
             return temp;
         } else {
             throw new InvalidParameterException("Denied. Wrong state");
@@ -166,18 +168,29 @@ public class EventServiceImpl implements EventService {
                 start, end, pageable));
     }
 
-    public EventFullDto changeEvent(Long eventId, EventFullDto eventFullDto) {
+    public EventFullDto changeEvent(Long eventId, UpdateEventRequest updateEventRequest) {
         Event temp = eventRepository.getReferenceById(eventId);
-        temp.setAnnotation(eventFullDto.getAnnotation());
-        temp.setCategory(CategoryMapper.toCategory(eventFullDto.getCategory()));
-        temp.setDescription(eventFullDto.getDescription());
-        temp.setEventDate(eventFullDto.getEventDate());
-        temp.setLat(eventFullDto.getLocation().getLat());
-        temp.setLon(eventFullDto.getLocation().getLon());
-        temp.setPaid(eventFullDto.getPaid());
-        temp.setParticipantLimit(eventFullDto.getParticipantLimit());
-        temp.setRequestModeration(eventFullDto.getRequestModeration());
-        temp.setTitle(eventFullDto.getTitle());
+        if (updateEventRequest.getAnnotation() != null) {
+            temp.setAnnotation(updateEventRequest.getAnnotation());
+        }
+        if (updateEventRequest.getDescription() != null) {
+            temp.setDescription(updateEventRequest.getDescription());
+        }
+        if (updateEventRequest.getEventDate() != null) {
+            temp.setEventDate(updateEventRequest.getEventDate());
+        }
+        if (updateEventRequest.getPaid() != null) {
+            temp.setPaid(updateEventRequest.getPaid());
+        }
+        if (updateEventRequest.getParticipantLimit() != null) {
+            temp.setParticipantLimit(updateEventRequest.getParticipantLimit());
+        }
+        if (updateEventRequest.getTitle() != null) {
+            temp.setTitle(updateEventRequest.getTitle());
+        }
+        if (updateEventRequest.getCategoryId() != null) {
+            temp.setCategory(categoryRepository.getReferenceById(updateEventRequest.getCategoryId()));
+        }
         return EventMapper.toEventFullDto(eventRepository.save(temp));
     }
 
@@ -190,6 +203,7 @@ public class EventServiceImpl implements EventService {
             throw new InvalidParameterException("Denied. Event should have PENDING state");
         }
         tempEvent.setState(EventState.PUBLISHED);
+        tempEvent.setPublishedOn(LocalDateTime.now());
         return EventMapper.toEventFullDto(eventRepository.save(tempEvent));
     }
 
@@ -199,7 +213,7 @@ public class EventServiceImpl implements EventService {
         if (tempEvent.getState().equals(EventState.PUBLISHED)) {
             throw new InvalidParameterException("Denied. Event is already published");
         }
-        tempEvent.setState(EventState.CANCELLED);
+        tempEvent.setState(EventState.CANCELED);
         return EventMapper.toEventFullDto(eventRepository.save(tempEvent));
     }
 
@@ -241,74 +255,69 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    public List<EventShortDto> getSortedEvents(String text, List<Integer> categories, Boolean paid,
+    public List<EventShortDto> getSortedEvents(String text, List<Long> categories, Boolean paid,
                                                String rangeStart, String rangeEnd, Boolean onlyAvailable,
                                                String sort, Integer from, Integer size, HttpServletRequest request) {
-        LocalDateTime start;
-        LocalDateTime end;
-        String sorting = "";
-        String availableCondition;
 
-        if (rangeStart != null && rangeEnd != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            start = LocalDateTime.parse(rangeStart, formatter);
-            end = LocalDateTime.parse(rangeEnd, formatter);
+        String sorting = "";
+
+        LocalDateTime start = (rangeStart == null) ? LocalDateTime.now() :
+                LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        LocalDateTime end;
+        if (rangeEnd == null) {
+            end = LocalDateTime.MAX;
         } else {
-            start = LocalDateTime.now();
-            end = LocalDateTime.now().plusYears(100);
+            end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         if (sort.equals(EventSortType.EVENT_DATE.toString())) {
             sorting = "eventDate";
         } else if (sort.equals(EventSortType.VIEWS.toString())) {
             sorting = "views";
         }
-        if (onlyAvailable.equals(false)) {
-            availableCondition = "";
-        } else {
-            availableCondition = "e.confirmedRequests < e.participantLimit";
-        }
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
 
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
                 paid, start, end, pageable);
 
-        sortedEvents.forEach(e -> {
-            List<ViewStats> stats = statsClient.stats(start,
-                    end,
-                    List.of(String.format("/events/%s", e.getId())),
-                    false);
-            if (stats.isEmpty()) {
-                e.setViews(0);
-            } else {
-                e.setViews(stats.get(0).getHits());
-            }
-        });
-        saveStatistics(request);
+        for (Event event : sortedEvents) {
+            event.setViews(getViews(event.getId()));
+        }
+
         return EventMapper.toEventShortDtos(sortedEvents);
 
     }
 
     @Override
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() ->
-                new EventNotFoundException("Event not found"));
-
-        List<String> uris = List.of(request.getRequestURI());
-        List<ViewStats> stats = statsClient.stats(LocalDateTime.now(), LocalDateTime.now(), uris, true);
-        int hits = stats.stream()
-                .filter(s -> s.getApp().equals("mainApp"))
-                .map(ViewStats::getHits).mapToInt(Integer::intValue).sum();
-        event.setViews(hits);
-        saveStatistics(request);
-        return EventMapper.toEventFullDto(event);
+        EventFullDto eventFullDto = EventMapper.toEventFullDto(eventRepository.findById(eventId).orElseThrow(() ->
+                new EventNotFoundException("Event not found")));
+        eventFullDto.setViews(getViews(eventId));
+        return eventFullDto;
     }
 
-    private void saveStatistics(HttpServletRequest request) {
-        EndpointHit endpointHit = new EndpointHit();
-        endpointHit.setApp("mainApp");
-        endpointHit.setUri(request.getRemoteAddr());
-        endpointHit.setIp(request.getRequestURI());
-        endpointHit.setTimestamp(String.valueOf(LocalDateTime.now()));
-        statsClient.hit(endpointHit);
+    public int getViews(long eventId) {
+        ResponseEntity<Object> responseEntity = statsClient.getStat(
+                LocalDateTime.of(2020, 9, 1, 0, 0),
+                LocalDateTime.now(),
+                List.of("/events/" + eventId),
+                false);
+
+        log.info("responseEntity {}", responseEntity.getBody());
+        if (responseEntity.getBody().equals("")) {
+            Integer hits = (Integer) ((LinkedHashMap) responseEntity.getBody()).get("hits");
+            return hits;
+        }
+        return 0;
+    }
+
+    public void sentHitStat(HttpServletRequest request) {
+        log.info("request URL {}", request.getRequestURI());
+        EndpointHitDto endpointHitDto = new EndpointHitDto();
+        endpointHitDto.setApp("mainApp");
+        endpointHitDto.setUri(request.getRequestURI());
+        endpointHitDto.setIp(request.getRemoteAddr());
+        endpointHitDto.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        statsClient.createHit(endpointHitDto);
     }
 }

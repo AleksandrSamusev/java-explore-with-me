@@ -27,10 +27,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                        LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE" +
-            " (upper(e.annotation) like upper(CONCAT('%',:text,'%')) or upper(e.description)" +
-            " like upper(CONCAT('%',:text,'%')) or :text is null) and e.category IN :categories and" +
-            " e.paid = :paid and e.eventDate > :start and e.eventDate < :end")
-    List<Event> getFilteredEvents(String text, List<Integer> categories,
+            " (upper(e.annotation) like upper(CONCAT('%',?1,'%')) or upper(e.description)" +
+            " like upper(CONCAT('%',?1,'%')) or ?1 is null) and e.category.id IN (?2) and" +
+            " e.paid = ?3 and e.eventDate > ?4 and e.eventDate < ?5")
+    List<Event> getFilteredEvents(String text, List<Long> categories,
                                   Boolean paid, LocalDateTime start, LocalDateTime end,
                                   Pageable pageable);
 }

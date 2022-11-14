@@ -21,7 +21,7 @@ public class EventControllerPublic {
 
     @GetMapping
     public List<EventShortDto> getSortedEvents(@RequestParam String text,
-                                               @RequestParam List<Integer> categories,
+                                               @RequestParam List<Long> categories,
                                                @RequestParam Boolean paid,
                                                @RequestParam String rangeStart,
                                                @RequestParam String rangeEnd,
@@ -31,12 +31,14 @@ public class EventControllerPublic {
                                                @RequestParam(defaultValue = "10") Integer size,
                                                HttpServletRequest request) {
 
+        eventService.sentHitStat(request);
         return eventService.getSortedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort,
                 from, size, request);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(@PathVariable Long eventId, HttpServletRequest request) {
+        eventService.sentHitStat(request);
         return eventService.getEvent(eventId, request);
     }
 
