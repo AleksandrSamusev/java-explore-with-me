@@ -1,8 +1,8 @@
 version: '3.1'
 services:
   mainApp:
-    build: ./main-app
-    container_name: main-app
+    build: ./mainapp
+    container_name: mainapp
     ports:
       - "8080:8080"
     depends_on:
@@ -25,8 +25,8 @@ services:
       - POSTGRES_PASSWORD=shareit
 
   statsApp:
-    build: ./stats-app
-    container_name: stats-app
+    build: ./statsapp
+    container_name: statsapp
     ports:
       - "9090:9090"
     depends_on:
