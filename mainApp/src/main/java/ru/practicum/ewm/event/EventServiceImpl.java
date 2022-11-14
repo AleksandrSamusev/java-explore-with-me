@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
+import ru.practicum.ewm.client.dto.EndpointHitDto;
 import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
-import ru.practicum.stat.dto.EndpointHitDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
