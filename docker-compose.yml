@@ -1,6 +1,6 @@
 version: '3.1'
 services:
-  mainApp:
+  mainapp:
     build: ./mainapp
     container_name: mainapp
     ports:
@@ -24,7 +24,7 @@ services:
       - POSTGRES_USER=shareit
       - POSTGRES_PASSWORD=shareit
 
-  statsApp:
+  statsapp:
     build: ./statsapp
     container_name: statsapp
     ports:
