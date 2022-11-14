@@ -67,7 +67,6 @@ public class Event {
     @Column(name = "available")
     private Boolean available;
 
-
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "events")
     private List<Compilation> compilations;
 
