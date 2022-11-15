@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
-import ru.practicum.ewm.client.dto.EndpointHitDto;
+import ru.practicum.ewm.client.model.EndpointHit;
 import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
@@ -349,11 +349,11 @@ public class EventServiceImpl implements EventService {
 
     public void sentHitStat(HttpServletRequest request) {
         log.info("request URL {}", request.getRequestURI());
-        EndpointHitDto endpointHitDto = new EndpointHitDto();
-        endpointHitDto.setApp("mainApp");
-        endpointHitDto.setUri(request.getRequestURI());
-        endpointHitDto.setIp(request.getRemoteAddr());
-        endpointHitDto.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        statsClient.createHit(endpointHitDto);
+        EndpointHit endpointHit = new EndpointHit();
+        endpointHit.setApp("mainApp");
+        endpointHit.setUri(request.getRequestURI());
+        endpointHit.setIp(request.getRemoteAddr());
+        endpointHit.setTimestamp(LocalDateTime.now());
+        statsClient.createHit(endpointHit);
     }
 }
