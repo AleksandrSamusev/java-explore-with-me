@@ -23,10 +23,10 @@ public class EventControllerPublic {
     public List<EventShortDto> getSortedEvents(@RequestParam String text,
                                                @RequestParam List<Long> categories,
                                                @RequestParam Boolean paid,
-                                               @RequestParam String rangeStart,
-                                               @RequestParam String rangeEnd,
+                                               @RequestParam(defaultValue = "null") String rangeStart,
+                                               @RequestParam(defaultValue = "null") String rangeEnd,
                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-                                               @RequestParam String sort,
+                                               @RequestParam(defaultValue = "id") String sort,
                                                @RequestParam(defaultValue = "0") Integer from,
                                                @RequestParam(defaultValue = "10") Integer size,
                                                HttpServletRequest request) {

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -113,8 +114,11 @@ public class EventServiceImpl implements EventService {
     public List<ParticipationRequestDto> findAllRequestsByUserIdAndEventId(Long userId, Long eventId) {
         validateUserId(userId);
         validateEventId(eventId);
+        if (!Objects.equals(userId, eventRepository.getReferenceById(eventId).getInitiator().getId())) {
+            throw new InvalidParameterException("Only owner can check the requests");
+        }
         return RequestMapper.toParticipationRequestDtos(requestRepository
-                .findAllRequestsByUserIdAndEventId(userId, eventId));
+                .findAllRequestsByEventId(eventId));
     }
 
     public ParticipationRequestDto confirmAnotherRequestToUsersEvent(Long userId, Long eventId, Long requestId) {
@@ -153,16 +157,18 @@ public class EventServiceImpl implements EventService {
 
     public List<EventFullDto> findAllUsersEventsFull(List<Long> users, List<EventState> states, List<Long> categories,
                                                      String rangeStart, String rangeEnd, Integer from, Integer size) {
-        LocalDateTime start;
-        LocalDateTime end;
 
-        if (rangeStart != null && rangeEnd != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            start = LocalDateTime.parse(rangeStart, formatter);
-            end = LocalDateTime.parse(rangeEnd, formatter);
-        } else {
+        LocalDateTime start;
+        if (rangeStart.equals("null")) {
             start = LocalDateTime.now();
+        } else {
+            start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+        LocalDateTime end;
+        if (rangeEnd.equals("null")) {
             end = LocalDateTime.now().plusYears(100);
+        } else {
+            end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
 
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
@@ -283,22 +289,28 @@ public class EventServiceImpl implements EventService {
                                                String rangeStart, String rangeEnd, Boolean onlyAvailable,
                                                String sort, Integer from, Integer size, HttpServletRequest request) {
 
-        String sorting = "";
-
-        LocalDateTime start = (rangeStart == null) ? LocalDateTime.now() :
-                LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-        LocalDateTime end;
-        if (rangeEnd == null) {
-            end = LocalDateTime.MAX;
-        } else {
-            end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
+        String sorting;
         if (sort.equals(EventSortType.EVENT_DATE.toString())) {
             sorting = "eventDate";
         } else if (sort.equals(EventSortType.VIEWS.toString())) {
             sorting = "views";
+        } else {
+            sorting = "id";
         }
+
+        LocalDateTime start;
+        if (rangeStart.equals("null")) {
+            start = LocalDateTime.now();
+        } else {
+            start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+        LocalDateTime end;
+        if (rangeEnd.equals("null")) {
+            end = LocalDateTime.now().plusYears(100);
+        } else {
+            end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
 
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
