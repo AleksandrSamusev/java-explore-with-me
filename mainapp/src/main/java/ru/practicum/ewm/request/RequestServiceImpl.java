@@ -71,7 +71,16 @@ public class RequestServiceImpl implements RequestService {
         validateUserId(userId);
         validateRequestId(requestId);
         Request temp = requestRepository.getReferenceById(requestId);
-        temp.setStatus(RequestStatus.CANCELLED);
+        if (temp.getStatus().equals(RequestStatus.CANCELED)) {
+            throw new InvalidParameterException("Request already canceled");
+        } else if (temp.getStatus().equals(RequestStatus.PENDING)) {
+            temp.setStatus(RequestStatus.CANCELED);
+        } else if (temp.getStatus().equals(RequestStatus.CONFIRMED)) {
+            temp.setStatus(RequestStatus.CANCELED);
+            Event tempEvent = eventRepository.getReferenceById(temp.getEventId());
+            tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() - 1);
+            eventRepository.save(tempEvent);
+        }
         return RequestMapper.toParticipationRequestDto(requestRepository.save(temp));
     }
 

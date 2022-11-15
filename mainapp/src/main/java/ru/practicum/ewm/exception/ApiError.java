@@ -1,18 +1,17 @@
 package ru.practicum.ewm.exception;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class ApiError {
-    List<String> errors;
-    String message;
-    String reason;
-    ErrorStatus status;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime timestamp;
+    private Set<String> errors = new HashSet<>();
+    private String message;
+    private String reason;
+    private String status;
+    private Timestamp timestamp;
 
 }

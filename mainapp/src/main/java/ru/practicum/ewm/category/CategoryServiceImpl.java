@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.exception.CategoryNotFoundException;
+import ru.practicum.ewm.exception.InvalidParameterException;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public CategoryDto createCategory(CategoryDto categoryDto) {
+        validateCategoryDtoCreate(categoryDto);
         return CategoryMapper.toCategoryDto(categoryRepository.save(CategoryMapper.toCategory(categoryDto)));
     }
 
@@ -43,11 +45,23 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public CategoryDto patchCategory(CategoryDto categoryDto) {
-        Category category = categoryRepository.getReferenceById(categoryDto.getId());
-        if (categoryDto.getName() != null && !categoryDto.getName().equals("")) {
-            category.setName(categoryDto.getName());
-        }
+        validateCategoryDto(categoryDto);
+        Category category = categoryRepository.findById(categoryDto.getId())
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
+        category.setName(categoryDto.getName());
         log.info("Updated category with ID = {} ", categoryDto.getId());
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
+    }
+
+    private void validateCategoryDto(CategoryDto categoryDto) {
+        if (categoryDto.getId() == null || categoryDto.getName() == null || categoryDto.getName().isBlank()) {
+            throw new InvalidParameterException("Not valid parameter");
+        }
+    }
+
+    private void validateCategoryDtoCreate(CategoryDto categoryDto) {
+        if (categoryDto.getName() == null || categoryDto.getName().isBlank()) {
+            throw new InvalidParameterException("Not valid parameter");
+        }
     }
 }

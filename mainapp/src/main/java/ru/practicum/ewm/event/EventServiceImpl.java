@@ -50,6 +50,8 @@ public class EventServiceImpl implements EventService {
     }
 
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
+        validateUserId(userId);
+        validateNewEventDto(newEventDto);
         User user = userRepository.getReferenceById(userId);
         Category category = categoryRepository.getReferenceById(newEventDto.getCategory());
         Event event = EventMapper.toEventFromNewEventDto(newEventDto);
@@ -145,7 +147,7 @@ public class EventServiceImpl implements EventService {
         validateEventId(eventId);
         validateRequestId(requestId);
         Request tempRequest = requestRepository.getReferenceById(requestId);
-        tempRequest.setStatus(RequestStatus.CANCELLED);
+        tempRequest.setStatus(RequestStatus.REJECTED);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
     }
 
@@ -244,6 +246,28 @@ public class EventServiceImpl implements EventService {
     private void validateNewEventDto(NewEventDto newEventDto) {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2L))) {
             throw new InvalidParameterException("Denied. Less then 2hrs before the event.");
+        }
+        if (newEventDto.getAnnotation() == null || newEventDto.getAnnotation().isBlank() ||
+                newEventDto.getAnnotation().length() > 2000 || newEventDto.getAnnotation().length() < 20) {
+            throw new InvalidParameterException("annotation does not meet the requirements");
+        }
+        if (newEventDto.getCategory() == null) {
+            throw new InvalidParameterException("categories does not meet the requirements");
+        }
+        if (newEventDto.getDescription() == null || newEventDto.getDescription().isBlank() ||
+                newEventDto.getDescription().length() > 7000 || newEventDto.getDescription().length() < 20) {
+            throw new InvalidParameterException("description does not meet the requirements");
+        }
+        if (newEventDto.getEventDate() == null) {
+            throw new InvalidParameterException("event date does not meet the requirements");
+        }
+        if (newEventDto.getLocation() == null || newEventDto.getLocation().getLat() == null ||
+                newEventDto.getLocation().getLon() == null) {
+            throw new InvalidParameterException("location does not meet the requirements");
+        }
+        if (newEventDto.getTitle() == null || newEventDto.getTitle().isBlank()
+                || newEventDto.getTitle().length() > 120 || newEventDto.getTitle().length() < 3) {
+            throw new InvalidParameterException("title does not meet the requirements");
         }
     }
 

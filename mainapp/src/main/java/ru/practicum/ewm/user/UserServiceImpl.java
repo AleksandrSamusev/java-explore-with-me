@@ -3,12 +3,12 @@ package ru.practicum.ewm.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -20,8 +20,10 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto createUser(NewUserRequest newUserRequest) {
+        validateNewUserRequest(newUserRequest);
         log.info("Created user");
-        return UserMapper.toUserDto(userRepository.save(UserMapper.toUserFromNewRequest(newUserRequest)));
+        User user = userRepository.save(UserMapper.toUserFromNewRequest(newUserRequest));
+        return UserMapper.toUserDto(user);
     }
 
     public void deleteUserById(Long userId) {
@@ -33,17 +35,17 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
-        List<User> users = new ArrayList<>();
-        if (ids != null) {
-            validateIds(ids);
-            for (Long id : ids) {
-                users.add(userRepository.getReferenceById(id));
-            }
-        } else {
-            Pageable pageable = PageRequest.of(from / size, size, Sort.by("userId"));
-            users = userRepository.findAllUsers(pageable);
+        Pageable pageable = PageRequest.of(from / size, size);
+        if (ids.isEmpty()) {
+            return userRepository.findAll(pageable)
+                    .stream()
+                    .map(UserMapper::toUserDto)
+                    .collect(Collectors.toList());
         }
-        return UserMapper.toUserDtoList(users);
+        return userRepository.findAllUsersByIds(ids, pageable)
+                .stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     private void validateIds(List<Long> ids) {
@@ -51,6 +53,15 @@ public class UserServiceImpl implements UserService {
             if (!userRepository.existsById(id)) {
                 throw new UserNotFoundException("User not found");
             }
+        }
+    }
+
+    private void validateNewUserRequest(NewUserRequest newUserRequest) {
+        if (newUserRequest.getName() == null || newUserRequest.getEmail() == null) {
+            throw new InvalidParameterException("Invalid parameter");
+        }
+        if (newUserRequest.getEmail().isBlank() || !newUserRequest.getEmail().contains("@")) {
+            throw new InvalidParameterException("incorrect email address");
         }
     }
 

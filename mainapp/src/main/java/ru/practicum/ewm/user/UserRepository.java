@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-
-    @Query("SELECT u FROM User u")
-    List<User> findAllUsers(Pageable pageable);
+    @Query("select u from User u where u.id in ?1")
+    List<User> findAllUsersByIds(List<Long> ids, Pageable pageable);
 }

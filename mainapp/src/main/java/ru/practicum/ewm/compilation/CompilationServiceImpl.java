@@ -40,6 +40,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
+        validateNewCompilationDto(newCompilationDto);
         Compilation tempCompilation = CompilationMapper.toCompilationFromNew(newCompilationDto);
         List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
         tempCompilation.setEvents(events);
@@ -81,14 +82,6 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     private void validateNewCompilationDto(NewCompilationDto newCompilationDto) {
-        if (newCompilationDto.getEvents() == null) {
-            throw new InvalidParameterException("Empty ids list");
-        }
-        for (Long id : newCompilationDto.getEvents()) {
-            if (!eventRepository.existsById(id)) {
-                throw new CompilationNotFoundException("Compilation not found");
-            }
-        }
         if (newCompilationDto.getTitle() == null || newCompilationDto.getTitle().isBlank()) {
             throw new InvalidParameterException("Title parameter is not valid");
         }

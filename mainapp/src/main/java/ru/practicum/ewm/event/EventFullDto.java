@@ -8,6 +8,8 @@ import ru.practicum.ewm.category.CategoryDto;
 import ru.practicum.ewm.location.Location;
 import ru.practicum.ewm.user.UserShortDto;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -33,6 +35,7 @@ public class EventFullDto {
     private UserShortDto initiator;
     private String description;
     private Integer participantLimit;
+    @Enumerated(EnumType.STRING)
     private EventState state;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdOn;

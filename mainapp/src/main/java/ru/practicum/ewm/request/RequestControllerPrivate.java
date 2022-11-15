@@ -17,7 +17,7 @@ public class RequestControllerPrivate {
         this.requestService = requestService;
     }
 
-    @GetMapping
+    @GetMapping()
     public List<ParticipationRequestDto> findAllUsersRequests(@PathVariable Long userId) {
         return requestService.findAllUsersRequests(userId);
     }
