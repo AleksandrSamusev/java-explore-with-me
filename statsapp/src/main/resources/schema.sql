@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS hits
     app       text,
     uri       text,
     ip        text,
-    date_time timestamp
+    date_time timestamp without time zone
 );

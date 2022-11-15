@@ -1,8 +1,10 @@
 package ru.practicum.stat.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "hits")
@@ -21,7 +23,8 @@ public class EndpointHit {
     @Column(name = "ip")
     String ip;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "date_time")
-    String timestamp;
+    LocalDateTime timestamp;
 
 }

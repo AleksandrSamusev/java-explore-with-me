@@ -2,11 +2,11 @@ package ru.practicum.stat.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.stat.dto.EndpointHitDto;
-import ru.practicum.stat.mapper.EndpointHitMapper;
+import ru.practicum.stat.model.EndpointHit;
 import ru.practicum.stat.model.ViewStats;
 import ru.practicum.stat.repository.HitRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,22 +19,12 @@ public class HitServiceImpl implements HitService {
     }
 
     @Override
-    public EndpointHitDto createHit(EndpointHitDto endpointHitDto) {
-        return EndpointHitMapper.toEndpointHitDto(hitRepository.save(EndpointHitMapper.toEndpointHit(endpointHitDto)));
+    public EndpointHit createHit(EndpointHit endpointHit) {
+        return (hitRepository.save(endpointHit));
     }
 
     @Override
-    public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
-        if (uris == null) {
-            if (unique == null) {
-                return hitRepository.findAllHitsBetweenDates(start, end);
-            } else {
-                return hitRepository.findAllHitsBetweenDatesUnique(start, end);
-            }
-        }
-        if (unique == null) {
-            return hitRepository.findAllHitsBetweenDatesByUris(start, end, uris);
-        }
-        return hitRepository.findAllHitsBetweenDatesByUrisAndUnique(start, end, uris);
+    public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        return hitRepository.findAllByStartEndTime(start, end, uris, unique);
     }
 }
