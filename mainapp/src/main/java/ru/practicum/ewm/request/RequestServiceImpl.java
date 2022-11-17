@@ -1,5 +1,6 @@
 package ru.practicum.ewm.request;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
@@ -38,16 +40,23 @@ public class RequestServiceImpl implements RequestService {
         for (Request request : usersRequests) {
             if (request.getEventId().equals(eventId) && (request.getStatus().equals(RequestStatus.PENDING) ||
                     (request.getStatus().equals(RequestStatus.CONFIRMED)))) {
+                log.info("Request from user with id = {} to event with id = {} already exists", userId, eventId);
                 throw new InvalidParameterException("Denied. Request already created");
             }
         }
         if (eventRepository.getReferenceById(eventId).getInitiator().getId().equals(userId)) {
+            log.info("Request was not created. User with id = {} is an initiator of the event with id = {}"
+                    , userId, eventId);
             throw new InvalidParameterException("Denied. Can't be requested by initiator of the event");
         } else if (!eventRepository.getReferenceById(eventId).getState().equals(EventState.PUBLISHED)) {
+            log.info("Request from user with id = {} was not created. Event with id = {} not published yet",
+                    userId, eventId);
             throw new InvalidParameterException("Denied. Event is not published yet");
         } else if (eventRepository.getReferenceById(eventId).getRequestModeration() &&
                 requestRepository.findAllConfirmedRequestsByEventId(eventId).size() ==
                         eventRepository.getReferenceById(eventId).getParticipantLimit()) {
+            log.info("Request from user with id = {} was not created. Participants limit to event with id = {} reached",
+                    userId, eventId);
             throw new InvalidParameterException("Denied. Participants limit reached.");
         } else {
 
@@ -63,6 +72,7 @@ public class RequestServiceImpl implements RequestService {
                 eventForSave.setConfirmedRequests(eventForSave.getConfirmedRequests() + 1);
                 eventRepository.save(eventForSave);
             }
+            log.info("Request from user with id = {} to event with id = {} was created", userId, eventId);
             return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
         }
     }
@@ -72,6 +82,7 @@ public class RequestServiceImpl implements RequestService {
         validateRequestId(requestId);
         Request temp = requestRepository.getReferenceById(requestId);
         if (temp.getStatus().equals(RequestStatus.CANCELED)) {
+            log.info("Request with id = {} from user with id = {} already cancelled", requestId, userId);
             throw new InvalidParameterException("Request already canceled");
         } else if (temp.getStatus().equals(RequestStatus.PENDING)) {
             temp.setStatus(RequestStatus.CANCELED);
@@ -81,23 +92,27 @@ public class RequestServiceImpl implements RequestService {
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() - 1);
             eventRepository.save(tempEvent);
         }
+        log.info("Request with id = {} from user with id = {} was cancelled", requestId, userId);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(temp));
     }
 
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
+            log.info("Event with id = {} not found", eventId);
             throw new EventNotFoundException("Event not found");
         }
     }
 
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
+            log.info("User with id = {} not found", userId);
             throw new UserNotFoundException("User not found");
         }
     }
 
     private void validateRequestId(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
+            log.info("Request with id = {} not found", requestId);
             throw new RequestNotFoundException("Request not found");
         }
     }

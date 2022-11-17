@@ -60,6 +60,7 @@ public class EventServiceImpl implements EventService {
         event.setCategory(category);
         event.setAvailable(true);
         Event saved = eventRepository.save(event);
+        log.info("New event from user with id = {} created", userId);
         return EventMapper.toEventFullDto(saved);
     }
 
@@ -90,6 +91,7 @@ public class EventServiceImpl implements EventService {
         if (updateEventRequest.getTitle() != null) {
             temp.setTitle(updateEventRequest.getTitle());
         }
+        log.info("Event with id = {} was patched", updateEventRequest.getEventId());
         return EventMapper.toEventFullDto(eventRepository.save(temp));
     }
 
@@ -105,8 +107,11 @@ public class EventServiceImpl implements EventService {
         EventFullDto temp = EventMapper.toEventFullDto(eventRepository.findEventByUserIdAAndEventId(userId, eventId));
         if (temp.getState().equals(EventState.PENDING)) {
             temp.setState(EventState.CANCELED);
+            log.info("Event with id = {} was canceled by user with id = {}", eventId, userId);
             return temp;
         } else {
+            log.info("Only events in pending state can be canceled. Event with id = {} have status - {}",
+                    eventId, temp.getState());
             throw new InvalidParameterException("Denied. Wrong state");
         }
     }
@@ -115,6 +120,8 @@ public class EventServiceImpl implements EventService {
         validateUserId(userId);
         validateEventId(eventId);
         if (!Objects.equals(userId, eventRepository.getReferenceById(eventId).getInitiator().getId())) {
+            log.info("Only owner can check the requests. User with id = {} not an initiator of event with id = {}",
+                    userId, eventId);
             throw new InvalidParameterException("Only owner can check the requests");
         }
         return RequestMapper.toParticipationRequestDtos(requestRepository
@@ -133,6 +140,8 @@ public class EventServiceImpl implements EventService {
             eventRepository.save(tempEvent);
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                 == tempEvent.getParticipantLimit()) {
+            log.info("Request with id = {} was not confirmed. Participants limit to event with id = {} reached",
+                    requestId, eventId);
             throw new InvalidParameterException("Denied. Participants limit reached");
         } else {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
@@ -143,6 +152,8 @@ public class EventServiceImpl implements EventService {
                 requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.CONFIRMED);
             }
         }
+        log.info("Request with id = {} from user with id = {} to event with id = {} was rejected",
+                requestId, userId, eventId);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
     }
 
@@ -152,6 +163,8 @@ public class EventServiceImpl implements EventService {
         validateRequestId(requestId);
         Request tempRequest = requestRepository.getReferenceById(requestId);
         tempRequest.setStatus(RequestStatus.REJECTED);
+        log.info("Request with id = {} from user with id = {} to event with id = {} was rejected",
+                requestId, userId, eventId);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
     }
 
@@ -170,7 +183,6 @@ public class EventServiceImpl implements EventService {
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
-
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
         return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(users, categories, states,
                 start, end, pageable));
@@ -199,6 +211,7 @@ public class EventServiceImpl implements EventService {
         if (updateEventRequest.getCategoryId() != null) {
             temp.setCategory(categoryRepository.getReferenceById(updateEventRequest.getCategoryId()));
         }
+        log.info("Event with id = {} was updated", eventId);
         return EventMapper.toEventFullDto(eventRepository.save(temp));
     }
 
@@ -206,12 +219,15 @@ public class EventServiceImpl implements EventService {
         validateEventId(eventId);
         Event tempEvent = eventRepository.getReferenceById(eventId);
         if (tempEvent.getEventDate().isBefore(LocalDateTime.now().plusHours(1L))) {
+            log.info("Event with id = {} can't be posted. Less then 1 hour before the event", eventId);
             throw new InvalidParameterException("Denied. Less then 1hr before the event");
         } else if (!tempEvent.getState().equals(EventState.PENDING)) {
+            log.info("Event with id = {} can't be posted. Event should have pending status", eventId);
             throw new InvalidParameterException("Denied. Event should have PENDING state");
         }
         tempEvent.setState(EventState.PUBLISHED);
         tempEvent.setPublishedOn(LocalDateTime.now());
+        log.info("Event with id = {} was posted", eventId);
         return EventMapper.toEventFullDto(eventRepository.save(tempEvent));
     }
 
@@ -219,69 +235,67 @@ public class EventServiceImpl implements EventService {
         validateEventId(eventId);
         Event tempEvent = eventRepository.getReferenceById(eventId);
         if (tempEvent.getState().equals(EventState.PUBLISHED)) {
+            log.info("Event is already published");
             throw new InvalidParameterException("Denied. Event is already published");
         }
         tempEvent.setState(EventState.CANCELED);
+        log.info("Event with id = {} canceled", eventId);
         return EventMapper.toEventFullDto(eventRepository.save(tempEvent));
     }
 
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
+            log.info("Event with id = {} not found", eventId);
             throw new EventNotFoundException("Event not found");
         }
     }
 
     private void validateRequestId(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
-            throw new EventNotFoundException("Event not found");
-        }
-    }
-
-    private void validateUpdateEventRequest(UpdateEventRequest updateEventRequest) {
-        if (!eventRepository.existsById(updateEventRequest.getEventId())) {
+            log.info("Request with id = {} not found", requestId);
             throw new EventNotFoundException("Event not found");
         }
     }
 
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
+            log.info("User with id = {} not found", userId);
             throw new UserNotFoundException("User not found");
         }
     }
 
     private void validateNewEventDto(NewEventDto newEventDto) {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2L))) {
+            log.info("Less then 2hrs before the event");
             throw new InvalidParameterException("Denied. Less then 2hrs before the event.");
         }
         if (newEventDto.getAnnotation() == null || newEventDto.getAnnotation().isBlank() ||
                 newEventDto.getAnnotation().length() > 2000 || newEventDto.getAnnotation().length() < 20) {
+            log.info("Annotation should not be > 2000 or < 20 chars");
             throw new InvalidParameterException("annotation does not meet the requirements");
         }
         if (newEventDto.getCategory() == null) {
+            log.info("Category is null");
             throw new InvalidParameterException("categories does not meet the requirements");
         }
         if (newEventDto.getDescription() == null || newEventDto.getDescription().isBlank() ||
                 newEventDto.getDescription().length() > 7000 || newEventDto.getDescription().length() < 20) {
+            log.info("Description should not be > then 7000 or less then 20");
             throw new InvalidParameterException("description does not meet the requirements");
         }
         if (newEventDto.getEventDate() == null) {
+            log.info("The date is null");
             throw new InvalidParameterException("event date does not meet the requirements");
         }
         if (newEventDto.getLocation() == null || newEventDto.getLocation().getLat() == null ||
                 newEventDto.getLocation().getLon() == null) {
+            log.info("Location parameters is null");
             throw new InvalidParameterException("location does not meet the requirements");
         }
         if (newEventDto.getTitle() == null || newEventDto.getTitle().isBlank()
                 || newEventDto.getTitle().length() > 120 || newEventDto.getTitle().length() < 3) {
+            log.info("Title should be more then 3 chars and less then 120");
             throw new InvalidParameterException("title does not meet the requirements");
-        }
-    }
-
-    private void validateIds(List<Long> ids) {
-        for (Long id : ids) {
-            if (!userRepository.existsById(id)) {
-                throw new UserNotFoundException("User not found");
-            }
         }
     }
 
@@ -297,7 +311,6 @@ public class EventServiceImpl implements EventService {
         } else {
             sorting = "id";
         }
-
         LocalDateTime start;
         if (rangeStart.equals("null")) {
             start = LocalDateTime.now();

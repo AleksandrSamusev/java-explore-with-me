@@ -1,5 +1,6 @@
 package ru.practicum.ewm.compilation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
@@ -44,11 +46,13 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation tempCompilation = CompilationMapper.toCompilationFromNew(newCompilationDto);
         List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
         tempCompilation.setEvents(events);
+        log.info("New compilation created");
         return CompilationMapper.toCompilationDto(compilationRepository.save(tempCompilation));
     }
 
     public void deleteCompilationById(Long compilationId) {
         validateCompilationId(compilationId);
+        log.info("Compilation with id = {} deleted", compilationId);
         compilationRepository.deleteById(compilationId);
     }
 
@@ -65,6 +69,7 @@ public class CompilationServiceImpl implements CompilationService {
             }
         }
         tempCompilation.setEvents(tempEvents);
+        log.info("Event with id = {} was deleted from compilation with id = {}", eventId, compilationId);
         compilationRepository.save(tempCompilation);
     }
 
@@ -76,6 +81,7 @@ public class CompilationServiceImpl implements CompilationService {
         Event tempEvent = eventRepository.getReferenceById(eventId);
         tempEvents.add(tempEvent);
         tempCompilation.setEvents(tempEvents);
+        log.info("Event with id = {} was added to compilation with id = {}", eventId, compilationId);
         compilationRepository.save(tempCompilation);
 
     }
@@ -83,18 +89,21 @@ public class CompilationServiceImpl implements CompilationService {
 
     private void validateNewCompilationDto(NewCompilationDto newCompilationDto) {
         if (newCompilationDto.getTitle() == null || newCompilationDto.getTitle().isBlank()) {
+            log.info("Mandatory field 'title' is not valid");
             throw new InvalidParameterException("Title parameter is not valid");
         }
     }
 
     private void validateCompilationId(Long compilationId) {
         if (!compilationRepository.existsById(compilationId)) {
+            log.info("Compilation with id = {} was not found", compilationId);
             throw new CompilationNotFoundException("Compilation not found");
         }
     }
 
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
+            log.info("Event with id = {} was not found", eventId);
             throw new EventNotFoundException("Event not found");
         }
     }
@@ -105,6 +114,7 @@ public class CompilationServiceImpl implements CompilationService {
             ids.add(event.getId());
         }
         if (!ids.contains(eventId)) {
+            log.info("Event with id = {} not was not found in comppilation with id = {}", eventId, compilationId);
             throw new EventNotFoundException("Event not in compilation");
         }
     }
@@ -113,6 +123,7 @@ public class CompilationServiceImpl implements CompilationService {
         validateCompilationId(compilationId);
         Compilation tempCompilation = compilationRepository.getReferenceById(compilationId);
         tempCompilation.setPinned(false);
+        log.info("Compilation with id = {} was unpinned", compilationId);
         compilationRepository.save(tempCompilation);
     }
 
@@ -120,6 +131,7 @@ public class CompilationServiceImpl implements CompilationService {
         validateCompilationId(compilationId);
         Compilation tempCompilation = compilationRepository.getReferenceById(compilationId);
         tempCompilation.setPinned(true);
+        log.info("Compilation with id = {} was pinned", compilationId);
         compilationRepository.save(tempCompilation);
     }
 }
