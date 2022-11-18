@@ -20,6 +20,7 @@ import ru.practicum.ewm.user.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +42,6 @@ public class EventServiceImpl implements EventService {
         this.requestRepository = requestRepository;
         this.categoryRepository = categoryRepository;
         this.statsClient = statsClient;
-        ;
     }
 
     public List<EventShortDto> findAllUsersEvents(Long userId, Integer from, Integer size) {
@@ -323,18 +323,22 @@ public class EventServiceImpl implements EventService {
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
-
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
-
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
                 paid, start, end, pageable);
-
         for (Event event : sortedEvents) {
             event.setViews(getViews(event.getId()));
         }
-
+        if (onlyAvailable) {
+            List<Event> onlyAvailableSorted = new ArrayList<>();
+            for (Event event : sortedEvents) {
+                if (event.getConfirmedRequests() < event.getParticipantLimit()) {
+                    onlyAvailableSorted.add(event);
+                }
+            }
+            return EventMapper.toEventShortDtos(onlyAvailableSorted);
+        }
         return EventMapper.toEventShortDtos(sortedEvents);
-
     }
 
     @Override

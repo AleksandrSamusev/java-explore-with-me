@@ -45,8 +45,8 @@ public class RequestServiceImpl implements RequestService {
             }
         }
         if (eventRepository.getReferenceById(eventId).getInitiator().getId().equals(userId)) {
-            log.info("Request was not created. User with id = {} is an initiator of the event with id = {}"
-                    , userId, eventId);
+            log.info("Request was not created. User with id = {} is an initiator of the event with id = {}",
+                    userId, eventId);
             throw new InvalidParameterException("Denied. Can't be requested by initiator of the event");
         } else if (!eventRepository.getReferenceById(eventId).getState().equals(EventState.PUBLISHED)) {
             log.info("Request from user with id = {} was not created. Event with id = {} not published yet",

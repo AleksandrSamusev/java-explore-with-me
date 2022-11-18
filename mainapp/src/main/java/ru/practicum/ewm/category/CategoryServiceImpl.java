@@ -16,16 +16,13 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final EventRepository eventRepository;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository, EventRepository eventRepository) {
         this.categoryRepository = categoryRepository;
-        this.eventRepository = eventRepository;
     }
 
     public List<CategoryDto> getCategories(Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
-
         return CategoryMapper.toCategoryDtoList(categoryRepository.findAllCategories(pageable));
 
     }
@@ -37,11 +34,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     public CategoryDto createCategory(CategoryDto categoryDto) {
         validateCategoryDtoCreate(categoryDto);
+        log.info("New category was created");
         return CategoryMapper.toCategoryDto(categoryRepository.save(CategoryMapper.toCategory(categoryDto)));
     }
 
     public void deleteCategory(Long categoryId) {
-            categoryRepository.deleteById(categoryId);
+        log.info("Category with id = {} was deleted", categoryId);
+        categoryRepository.deleteById(categoryId);
     }
 
     public CategoryDto patchCategory(CategoryDto categoryDto) {
@@ -55,12 +54,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     private void validateCategoryDto(CategoryDto categoryDto) {
         if (categoryDto.getId() == null || categoryDto.getName() == null || categoryDto.getName().isBlank()) {
+            log.info("Mandatory fields ID and NAME are not valid");
             throw new InvalidParameterException("Not valid parameter");
         }
     }
 
     private void validateCategoryDtoCreate(CategoryDto categoryDto) {
         if (categoryDto.getName() == null || categoryDto.getName().isBlank()) {
+            log.info("Mandatory field NAME not valid");
             throw new InvalidParameterException("Not valid parameter");
         }
     }
