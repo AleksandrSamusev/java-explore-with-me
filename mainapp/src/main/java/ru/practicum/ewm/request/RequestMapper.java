@@ -7,15 +7,6 @@ import java.util.List;
 
 @Component
 public class RequestMapper {
-    public static Request toRequest(ParticipationRequestDto participationRequestDto) {
-        Request request = new Request();
-        request.setRequesterId(participationRequestDto.getRequester());
-        request.setId(participationRequestDto.getId());
-        request.setCreated(participationRequestDto.getCreated());
-        request.setEventId(participationRequestDto.getEvent());
-        request.setStatus(participationRequestDto.getStatus());
-        return request;
-    }
 
     public static ParticipationRequestDto toParticipationRequestDto(Request request) {
         ParticipationRequestDto participationRequestDto = new ParticipationRequestDto();

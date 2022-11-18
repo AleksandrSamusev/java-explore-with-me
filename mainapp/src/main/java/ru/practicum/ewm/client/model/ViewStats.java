@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ViewStats {
-    String app;
-    String uri;
-    int hits;
+    private String app;
+    private String uri;
+    private int hits;
 }

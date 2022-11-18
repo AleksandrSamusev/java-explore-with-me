@@ -12,19 +12,19 @@ import java.time.LocalDateTime;
 public class EndpointHit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "app")
-    String app;
+    private String app;
 
     @Column(name = "uri")
-    String uri;
+    private String uri;
 
     @Column(name = "ip")
-    String ip;
+    private String ip;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "date_time")
-    LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 
 }

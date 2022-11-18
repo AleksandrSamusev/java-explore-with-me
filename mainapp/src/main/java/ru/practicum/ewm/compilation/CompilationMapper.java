@@ -1,7 +1,6 @@
 package ru.practicum.ewm.compilation;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventMapper;
 
 import java.util.ArrayList;
@@ -24,19 +23,6 @@ public class CompilationMapper {
         compilationDto.setPinned(compilation.getPinned());
         compilationDto.setEvents(EventMapper.toEventShortDtos(compilation.getEvents()));
         return compilationDto;
-    }
-
-    public static NewCompilationDto toNewCompilationDto(Compilation compilation) {
-        NewCompilationDto newCompilationDto = new NewCompilationDto();
-        newCompilationDto.setTitle(compilation.getTitle());
-        newCompilationDto.setPinned(compilation.getPinned());
-
-        List<Long> eventIds = new ArrayList<>();
-        for (Event event : compilation.getEvents()) {
-            eventIds.add(event.getId());
-        }
-        newCompilationDto.setEvents(eventIds);
-        return newCompilationDto;
     }
 
     public static List<CompilationDto> toCompilationDtos(List<Compilation> compilations) {

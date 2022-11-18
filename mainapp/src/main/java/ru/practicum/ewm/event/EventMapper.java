@@ -11,27 +11,6 @@ import java.util.List;
 
 @Component
 public class EventMapper {
-    public static Event toEvent(EventFullDto eventFullDto) {
-        Event event = new Event();
-        event.setId(eventFullDto.getId());
-        event.setEventDate(eventFullDto.getEventDate());
-        event.setAnnotation(eventFullDto.getAnnotation());
-        event.setCategory(CategoryMapper.toCategory(eventFullDto.getCategory()));
-        event.setPaid(eventFullDto.getPaid());
-        event.setDescription(eventFullDto.getDescription());
-        event.setConfirmedRequests(eventFullDto.getConfirmedRequests());
-        event.setCreatedOn(eventFullDto.getCreatedOn());
-        event.setInitiator(UserMapper.toUserFromShortDto(eventFullDto.getInitiator()));
-        event.setLat(eventFullDto.getLocation().getLat());
-        event.setLon(eventFullDto.getLocation().getLon());
-        event.setParticipantLimit(eventFullDto.getParticipantLimit());
-        event.setPublishedOn(eventFullDto.getPublishedOn());
-        event.setState(eventFullDto.getState());
-        event.setTitle(eventFullDto.getTitle());
-        event.setViews(eventFullDto.getViews());
-        event.setRequestModeration(eventFullDto.getRequestModeration());
-        return event;
-    }
 
     public static EventFullDto toEventFullDto(Event event) {
         EventFullDto eventFullDto = new EventFullDto();

@@ -1,44 +1,53 @@
 package ru.practicum.ewm.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.ewm.client.model.EndpointHit;
+import ru.practicum.ewm.client.model.ViewStats;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 @Component
-public class StatsClient extends BaseClient {
+@Slf4j
+public class StatsClient {
 
-    @Autowired
+    private final RestTemplate restTemplate;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public StatsClient(@Value("${stats.server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+        this.restTemplate = builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
+                .build();
     }
 
-    public ResponseEntity<Object> createHit(EndpointHit endpointHitDto) {
-        return post("/hit", endpointHitDto);
+    public void saveStats(EndpointHit endpointHit) {
+        restTemplate.postForObject("/hit", endpointHit, String.class);
     }
 
-    public ResponseEntity<Object> getStat(LocalDateTime start, LocalDateTime end,
-                                          List<String> uris, Boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                "end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                "uris", uris.get(0),
-                "unique", unique
-        );
-        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
+    public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique)
+            throws JsonProcessingException {
+        StringBuilder builder = new StringBuilder(String.format("/stats?start=%s&end=%s",
+                start.format(formatter),
+                end.format(formatter)));
+        if (uris != null) {
+            builder.append(String.format("&uris=%s", String.join(",", uris)));
+        }
+        if (unique != null) {
+            builder.append(String.format("&unique=%s", unique));
+        }
+        ResponseEntity<String> response = restTemplate.getForEntity(builder.toString(), String.class);
+        String jsonString = response.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(jsonString, new TypeReference<>() {
+        });
     }
 }

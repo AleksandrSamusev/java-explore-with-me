@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class EventControllerPublic {
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto getEvent(@PathVariable Long eventId, HttpServletRequest request) {
+    public EventFullDto getEvent(@PathVariable Long eventId, HttpServletRequest request) throws JsonProcessingException {
         eventService.sentHitStat(request);
         return eventService.getEvent(eventId, request);
     }

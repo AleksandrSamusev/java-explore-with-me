@@ -23,28 +23,33 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Override
     public List<CategoryDto> getCategories(Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
         return CategoryMapper.toCategoryDtoList(categoryRepository.findAllCategories(pageable));
 
     }
 
+    @Override
     public CategoryDto getCategoryById(Long categoryId) {
         return CategoryMapper.toCategoryDto(categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found")));
     }
 
+    @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         validateCategoryDtoCreate(categoryDto);
         log.info("New category was created");
         return CategoryMapper.toCategoryDto(categoryRepository.save(CategoryMapper.toCategory(categoryDto)));
     }
 
+    @Override
     public void deleteCategory(Long categoryId) {
         log.info("Category with id = {} was deleted", categoryId);
         categoryRepository.deleteById(categoryId);
     }
 
+    @Override
     public CategoryDto patchCategory(CategoryDto categoryDto) {
         validateCategoryDto(categoryDto);
         Category category = categoryRepository.findById(categoryDto.getId())

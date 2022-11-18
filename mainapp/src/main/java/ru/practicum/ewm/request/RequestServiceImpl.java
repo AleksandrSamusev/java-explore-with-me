@@ -28,11 +28,13 @@ public class RequestServiceImpl implements RequestService {
         this.eventRepository = eventRepository;
     }
 
+    @Override
     public List<ParticipationRequestDto> findAllUsersRequests(Long userId) {
         validateUserId(userId);
         return RequestMapper.toParticipationRequestDtos(requestRepository.findAllRequestsByUserId(userId));
     }
 
+    @Override
     public ParticipationRequestDto createRequestFromCurrentUser(Long userId, Long eventId) {
         validateUserId(userId);
         validateEventId(eventId);
@@ -77,6 +79,7 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    @Override
     public ParticipationRequestDto cancelOwnRequest(Long userId, Long requestId) {
         validateUserId(userId);
         validateRequestId(requestId);
