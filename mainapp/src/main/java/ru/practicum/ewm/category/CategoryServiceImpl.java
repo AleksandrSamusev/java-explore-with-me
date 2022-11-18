@@ -6,10 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.EventRepository;
+import ru.practicum.ewm.exception.CategoryConflictException;
 import ru.practicum.ewm.exception.CategoryNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -53,9 +55,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private void validateCategoryDto(CategoryDto categoryDto) {
-        if (categoryDto.getId() == null || categoryDto.getName() == null || categoryDto.getName().isBlank()) {
-            log.info("Mandatory fields ID and NAME are not valid");
-            throw new InvalidParameterException("Not valid parameter");
+        if (categoryDto.getId() == null) {
+            log.info("Mandatory field ID is absent");
+            throw new InvalidParameterException("Category id is absent");
+        }
+        if (categoryDto.getName() == null || categoryDto.getName().isBlank()) {
+            log.info("Mandatory field NAME is invalid");
+            throw new InvalidParameterException("Not valid NAME parameter");
+        }
+        if (isCategoryExistsByName(categoryDto.getName())) {
+            log.info("Category with the name - {} already exists", categoryDto.getName());
+            throw new CategoryConflictException("Category with this name already exists");
         }
     }
 
@@ -64,5 +74,14 @@ public class CategoryServiceImpl implements CategoryService {
             log.info("Mandatory field NAME not valid");
             throw new InvalidParameterException("Not valid parameter");
         }
+        if (isCategoryExistsByName(categoryDto.getName())) {
+            log.info("Category with the name - {} already exists", categoryDto.getName());
+            throw new CategoryConflictException("Category with this name already exists");
+        }
+    }
+
+    private boolean isCategoryExistsByName(String name) {
+        Optional<Category> category = Optional.ofNullable(categoryRepository.findByNameContainingIgnoreCase(name));
+        return category.isPresent();
     }
 }

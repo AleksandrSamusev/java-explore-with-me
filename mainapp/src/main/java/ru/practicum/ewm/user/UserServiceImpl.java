@@ -5,9 +5,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.InvalidParameterException;
+import ru.practicum.ewm.exception.UserConflictException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,6 +62,15 @@ public class UserServiceImpl implements UserService {
             log.info("Mandatory parameter EMAIL is invalid");
             throw new InvalidParameterException("incorrect email address");
         }
+        if (isUserExistsByName(newUserRequest.getName())) {
+            log.info("User with name - {} already exists", newUserRequest.getName());
+            throw new UserConflictException("User with such name already exists");
+        }
+    }
+
+    private boolean isUserExistsByName(String name) {
+        Optional<User> user = Optional.ofNullable(userRepository.findByNameContainingIgnoreCase(name));
+        return user.isPresent();
     }
 
 

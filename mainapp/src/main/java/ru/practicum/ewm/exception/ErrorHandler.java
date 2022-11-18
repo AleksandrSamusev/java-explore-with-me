@@ -26,6 +26,32 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleCategoryConflictException(final CategoryConflictException e) {
+        ApiError apiError = new ApiError();
+        Arrays.stream(e.getStackTrace())
+                .forEach(er -> apiError.getErrors().add(er.toString()));
+        apiError.setStatus(HttpStatus.CONFLICT.name());
+        apiError.setMessage(e.getMessage());
+        apiError.setReason("Conflict");
+        apiError.setTimestamp(Timestamp.from(Instant.now()));
+        return apiError;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleUserConflictException(final UserConflictException e) {
+        ApiError apiError = new ApiError();
+        Arrays.stream(e.getStackTrace())
+                .forEach(er -> apiError.getErrors().add(er.toString()));
+        apiError.setStatus(HttpStatus.CONFLICT.name());
+        apiError.setMessage(e.getMessage());
+        apiError.setReason("Conflict");
+        apiError.setTimestamp(Timestamp.from(Instant.now()));
+        return apiError;
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleCategoryNotFoundException(final CategoryNotFoundException e) {
         ApiError apiError = new ApiError();
