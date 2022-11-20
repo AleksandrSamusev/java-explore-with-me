@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Sql(scripts = "/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class CompilationServiceTests<T extends CompilationService> {
+    //test
     private final EntityManager em;
     private final CompilationService compilationService;
     private final EventService eventService;
