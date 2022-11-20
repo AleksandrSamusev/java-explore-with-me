@@ -35,4 +35,5 @@ public class NewEventDto {
     @NotNull
     @Length(max = 120, min = 3)
     private String title;
+
 }

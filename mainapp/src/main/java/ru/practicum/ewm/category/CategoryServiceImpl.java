@@ -37,10 +37,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto createCategory(CategoryDto categoryDto) {
-        validateCategoryDtoCreate(categoryDto);
+    public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
+        validateNewCategoryDto(newCategoryDto);
+        Category savedCategory = categoryRepository.save(CategoryMapper.toCategoryFromNew(newCategoryDto));
         log.info("New category was created");
-        return CategoryMapper.toCategoryDto(categoryRepository.save(CategoryMapper.toCategory(categoryDto)));
+        return CategoryMapper.toCategoryDto(savedCategory);
     }
 
     @Override
@@ -74,13 +75,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateCategoryDtoCreate(CategoryDto categoryDto) {
-        if (categoryDto.getName() == null || categoryDto.getName().isBlank()) {
+    private void validateNewCategoryDto(NewCategoryDto newCategoryDto) {
+        if (newCategoryDto.getName() == null || newCategoryDto.getName().isBlank()) {
             log.info("Mandatory field NAME not valid");
             throw new InvalidParameterException("Not valid parameter");
         }
-        if (isCategoryExistsByName(categoryDto.getName())) {
-            log.info("Category with the name - {} already exists", categoryDto.getName());
+        if (isCategoryExistsByName(newCategoryDto.getName())) {
+            log.info("Category with the name - {} already exists", newCategoryDto.getName());
             throw new CategoryConflictException("Category with this name already exists");
         }
     }

@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateNewUserRequest(NewUserRequest newUserRequest) {
-        if (newUserRequest.getName() == null || newUserRequest.getEmail() == null) {
+        if (newUserRequest.getName() == null || newUserRequest.getName().isBlank() || newUserRequest.getEmail() == null) {
             log.info("Mandatory parameter NAME is invalid");
             throw new InvalidParameterException("Invalid parameter");
         }

@@ -8,7 +8,7 @@ public interface CategoryService {
 
     CategoryDto getCategoryById(Long categoryId);
 
-    CategoryDto createCategory(CategoryDto categoryDto);
+    CategoryDto createCategory(NewCategoryDto categoryDto);
 
     void deleteCategory(Long categoryId);
 

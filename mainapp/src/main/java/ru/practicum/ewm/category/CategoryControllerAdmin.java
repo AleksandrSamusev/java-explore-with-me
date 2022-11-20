@@ -17,8 +17,8 @@ public class CategoryControllerAdmin {
     }
 
     @PostMapping
-    public CategoryDto createCategory(@RequestBody CategoryDto categoryDto) {
-        return categoryService.createCategory(categoryDto);
+    public CategoryDto createCategory(@RequestBody NewCategoryDto newCategoryDto) {
+        return categoryService.createCategory(newCategoryDto);
     }
 
     @DeleteMapping("/{categoryId}")
