@@ -27,8 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Sql(scripts = "/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+
 public class CategoryServiceTest<T extends CategoryService> {
+
     private final EntityManager em;
+
     private final CategoryService categoryService;
 
     @Test

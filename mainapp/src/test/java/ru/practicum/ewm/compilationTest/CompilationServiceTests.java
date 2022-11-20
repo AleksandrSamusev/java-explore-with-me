@@ -5,15 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import ru.practicum.ewm.category.CategoryService;
 import ru.practicum.ewm.compilation.Compilation;
 import ru.practicum.ewm.compilation.CompilationDto;
 import ru.practicum.ewm.compilation.CompilationService;
 import ru.practicum.ewm.compilation.NewCompilationDto;
-import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.exception.CompilationNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.user.UserService;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -29,14 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Sql(scripts = "/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+
 public class CompilationServiceTests<T extends CompilationService> {
-    //test
+
     private final EntityManager em;
     private final CompilationService compilationService;
-    private final EventService eventService;
-    private final CategoryService categoryService;
-    private final UserService userService;
-
 
     @Test
     public void givenValidDto_WhenCreateCompilation_ThenCompilationCreated() {
