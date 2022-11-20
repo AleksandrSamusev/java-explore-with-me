@@ -108,11 +108,11 @@ public class EventServiceImpl implements EventService {
     public EventFullDto cancelEventByUserIdAndEventId(Long userId, Long eventId) {
         validateUserId(userId);
         validateEventId(eventId);
-        EventFullDto temp = EventMapper.toEventFullDto(eventRepository.findEventByUserIdAAndEventId(userId, eventId));
+        Event temp = eventRepository.findEventByUserIdAAndEventId(userId, eventId);
         if (temp.getState().equals(EventState.PENDING)) {
             temp.setState(EventState.CANCELED);
             log.info("Event with id = {} was canceled by user with id = {}", eventId, userId);
-            return temp;
+            return EventMapper.toEventFullDto(eventRepository.save(temp));
         } else {
             log.info("Only events in pending state can be canceled. Event with id = {} have status - {}",
                     eventId, temp.getState());
@@ -140,12 +140,12 @@ public class EventServiceImpl implements EventService {
         validateRequestId(requestId);
         Request tempRequest = requestRepository.getReferenceById(requestId);
         Event tempEvent = eventRepository.getReferenceById(eventId);
-        if (tempEvent.getParticipantLimit() == 0 || !tempEvent.getRequestModeration()) {
+        if (tempEvent.getParticipantLimit() == 0 && !tempEvent.getRequestModeration()) {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
             eventRepository.save(tempEvent);
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
-                == tempEvent.getParticipantLimit()) {
+                == tempEvent.getParticipantLimit() && tempEvent.getParticipantLimit() != 0) {
             log.info("Request with id = {} was not confirmed. Participants limit to event with id = {} reached",
                     requestId, eventId);
             throw new InvalidParameterException("Denied. Participants limit reached");
@@ -158,7 +158,7 @@ public class EventServiceImpl implements EventService {
                 requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.CONFIRMED);
             }
         }
-        log.info("Request with id = {} from user with id = {} to event with id = {} was rejected",
+        log.info("Request with id = {} from user with id = {} to event with id = {} was confirmed",
                 requestId, userId, eventId);
         return RequestMapper.toParticipationRequestDto(requestRepository.save(tempRequest));
     }
@@ -383,8 +383,8 @@ public class EventServiceImpl implements EventService {
             log.info("Description should not be > then 7000 or less then 20");
             throw new InvalidParameterException("description does not meet the requirements");
         }
-        if (newEventDto.getEventDate() == null) {
-            log.info("The date is null");
+        if (newEventDto.getEventDate().isBefore(LocalDateTime.now())) {
+            log.info("The date is in past");
             throw new InvalidParameterException("event date does not meet the requirements");
         }
         if (newEventDto.getLocation() == null || newEventDto.getLocation().getLat() == null ||

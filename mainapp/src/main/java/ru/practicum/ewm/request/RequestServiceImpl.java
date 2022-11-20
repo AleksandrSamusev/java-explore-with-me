@@ -55,8 +55,9 @@ public class RequestServiceImpl implements RequestService {
                     userId, eventId);
             throw new InvalidParameterException("Denied. Event is not published yet");
         } else if (eventRepository.getReferenceById(eventId).getRequestModeration() &&
-                requestRepository.findAllConfirmedRequestsByEventId(eventId).size() ==
-                        eventRepository.getReferenceById(eventId).getParticipantLimit()) {
+                (requestRepository.findAllConfirmedRequestsByEventId(eventId).size() ==
+                        eventRepository.getReferenceById(eventId).getParticipantLimit() &&
+                        eventRepository.getReferenceById(eventId).getParticipantLimit() != 0)) {
             log.info("Request from user with id = {} was not created. Participants limit to event with id = {} reached",
                     userId, eventId);
             throw new InvalidParameterException("Denied. Participants limit reached.");
