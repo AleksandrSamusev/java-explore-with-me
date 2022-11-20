@@ -28,11 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Sql(scripts = "/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-
 public class UserServiceTest<T extends UserService> {
 
     private final EntityManager em;
-
     private final UserService userService;
 
 
