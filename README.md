@@ -1,3 +1,5 @@
+1. PR develop - https://github.com/AleksandrSamusev/java-explore-with-me/pull/1
+
 ## "Explore with me" - приложение для шеринга мероприятиями и событиями
 
 - [общая информация о приложении](#общая-информация-о-приложении)

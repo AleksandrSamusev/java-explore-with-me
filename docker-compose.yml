@@ -1,13 +1,13 @@
 version: '3.1'
 services:
-  mainapp:
+  ewm-service:
     build: ./mainapp
     container_name: mainapp
     ports:
       - "8080:8080"
     depends_on:
       - ewm-db
-      - statsapp
+      - stats-server
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
       - POSTGRES_USER=shareit
@@ -26,7 +26,7 @@ services:
       POSTGRES_USER: "shareit"
       POSTGRES_PASSWORD: "shareit"
 
-  statsapp:
+  stats-server:
     build: ./statsapp
     container_name: statsapp
     ports:
