@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stat.model.EndpointHit;
 import ru.practicum.stat.model.ViewStats;
+import ru.practicum.stat.service.HitService;
 import ru.practicum.stat.service.HitServiceImpl;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @Slf4j
 public class HitController {
-    private final HitServiceImpl hitService;
+    private final HitService hitService;
 
     @Autowired
     public HitController(HitServiceImpl hitService) {

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface HitRepository extends JpaRepository<EndpointHit, Long> {
+
     @Query(value = "select " +
             "   new ru.practicum.stat.model.ViewStats(h.app, h.uri, cast((1) as int))" +
             "from EndpointHit as h " +

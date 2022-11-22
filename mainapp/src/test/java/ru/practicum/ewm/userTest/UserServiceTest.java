@@ -14,7 +14,6 @@ import ru.practicum.ewm.user.UserDto;
 import ru.practicum.ewm.user.UserService;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.util.List;
 
@@ -35,96 +34,87 @@ public class UserServiceTest<T extends UserService> {
 
 
     @Test
-    public void givenNameIsOkAndEmailIsOk_WhenCreateUser_ThenUserCreated() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("User");
-        newUserRequest.setEmail("User@user.com");
-        userService.createUser(newUserRequest);
-        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.name = :name", User.class);
-        User dbUser = query.setParameter("name", newUserRequest.getName()).getSingleResult();
-        assertThat(dbUser.getEmail(), equalTo("User@user.com"));
-    }
+    public void givenValidUser_WhenCreateUser_ThenUserCreated() {
 
-    @Test
-    public void givenNameEqualsNullAndEmailIsOk_WhenCreateUser_ThenException() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName(null);
-        newUserRequest.setEmail("User@user.com");
-        assertThrows(InvalidParameterException.class,
-                () -> userService.createUser(newUserRequest));
-    }
-
-    @Test
-    public void givenNameEqualsEmptyAndEmailIsOk_WhenCreateUser_ThenException() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("");
-        newUserRequest.setEmail("User@user.com");
-        assertThrows(InvalidParameterException.class,
-                () -> userService.createUser(newUserRequest));
-    }
-
-    @Test
-    public void givenNameIsOkAndEmailIsNull_WhenCreateUser_ThenException() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("User");
-        newUserRequest.setEmail(null);
-        assertThrows(InvalidParameterException.class,
-                () -> userService.createUser(newUserRequest));
-    }
-
-    @Test
-    public void givenNameIsOkAndEmailIsEmpty_WhenCreateUser_ThenException() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("User");
-        newUserRequest.setEmail("");
-        assertThrows(InvalidParameterException.class,
-                () -> userService.createUser(newUserRequest));
-    }
-
-    @Test
-    public void givenNameIsEqualToExistingUserNameAndEmailIsOk_WhenCreateUser_ThenException() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("User");
-        newUserRequest.setEmail("user@user.com");
+        NewUserRequest newUserRequest = new NewUserRequest("User@user.com", "User");
         userService.createUser(newUserRequest);
 
-        NewUserRequest newUserRequest2 = new NewUserRequest();
-        newUserRequest2.setName("User");
-        newUserRequest.setEmail("user2@user.com");
+        assertThat(em.createQuery("SELECT u from User u where u.name = 'User'", User.class)
+                .getSingleResult().getEmail(), equalTo("User@user.com"));
+    }
+
+    @Test
+    public void givenNameEqualsNull_WhenCreateUser_ThenException() {
+
+        NewUserRequest newUserRequest = new NewUserRequest("User@user.com", null);
+
+        assertThrows(InvalidParameterException.class,
+                () -> userService.createUser(newUserRequest));
+    }
+
+    @Test
+    public void givenNameIsBlank_WhenCreateUser_ThenException() {
+
+        NewUserRequest newUserRequest = new NewUserRequest("User@user.com", "  ");
+
+        assertThrows(InvalidParameterException.class,
+                () -> userService.createUser(newUserRequest));
+    }
+
+    @Test
+    public void givenEmailIsNull_WhenCreateUser_ThenException() {
+
+        NewUserRequest newUserRequest = new NewUserRequest(null, "User");
+
+        assertThrows(InvalidParameterException.class,
+                () -> userService.createUser(newUserRequest));
+    }
+
+    @Test
+    public void givenEmailIsBlank_WhenCreateUser_ThenException() {
+
+        NewUserRequest newUserRequest = new NewUserRequest("  ", "User");
+
+        assertThrows(InvalidParameterException.class,
+                () -> userService.createUser(newUserRequest));
+    }
+
+    @Test
+    public void givenNameEqualsToExistingUserName_WhenCreateUser_ThenException() {
+
+        NewUserRequest user1 = new NewUserRequest("user@user.com", "User");
+        NewUserRequest user2 = new NewUserRequest("user2@user.com", "User");
+        userService.createUser(user1);
 
         assertThrows(UserConflictException.class,
-                () -> userService.createUser(newUserRequest));
+                () -> userService.createUser(user2));
     }
 
     @Test
-    public void givenIdIsInDatabase_WhenDeleteUser_ThenUserDeleted() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("User");
-        newUserRequest.setEmail("User@user.com");
-        userService.createUser(newUserRequest);
-        List<User> users = em.createQuery("select u from User u", User.class).getResultList();
-        assertThat(users.size(), equalTo(1));
-        assertThat(users.get(0).getId(), equalTo(1L));
+    public void givenUserExists_WhenDeleteUser_ThenUserDeleted() {
+
+        NewUserRequest user = new NewUserRequest("User@user.com", "User");
+        userService.createUser(user);
+
         userService.deleteUserById(1L);
-        List<User> usersAfter = em.createQuery("select u from User u", User.class).getResultList();
-        assertThat(usersAfter.size(), equalTo(0));
+
+        assertThat(em.createQuery("select u from User u", User.class)
+                .getResultList().size(), equalTo(0));
     }
 
     @Test
-    public void givenIdIsNotInDatabase_WhenDeleteUser_ThenException() {
-        NewUserRequest newUserRequest = new NewUserRequest();
-        newUserRequest.setName("User");
-        newUserRequest.setEmail("User@user.com");
-        userService.createUser(newUserRequest);
-        List<User> users = em.createQuery("select u from User u", User.class).getResultList();
-        assertThat(users.size(), equalTo(1));
-        assertThat(users.get(0).getId(), equalTo(1L));
+    public void givenUserNotExists_WhenDeleteUser_ThenException() {
+
+        NewUserRequest user = new NewUserRequest("User@user.com", "User");
+        userService.createUser(user);
+
         assertThrows(UserNotFoundException.class,
                 () -> userService.deleteUserById(999L));
     }
 
     @Test
     public void givenThreeIdsOfCreatedUsers_WhenGetUsers_ThenReturnListOfThree() {
+
         NewUserRequest newUserRequest1 = new NewUserRequest("user1@mail.com", "user1");
         NewUserRequest newUserRequest2 = new NewUserRequest("user2@mail.com", "user2");
         NewUserRequest newUserRequest3 = new NewUserRequest("user3@mail.com", "user3");
@@ -137,6 +127,7 @@ public class UserServiceTest<T extends UserService> {
         userService.createUser(newUserRequest5);
 
         List<UserDto> listOfThreeUsers = userService.getUsers(List.of(1L, 2L, 3L), 0, 10);
+
         assertThat(listOfThreeUsers.size(), equalTo(3));
         assertThat(listOfThreeUsers.get(0).getId(), equalTo(1L));
         assertThat(listOfThreeUsers.get(1).getId(), equalTo(2L));
@@ -145,6 +136,7 @@ public class UserServiceTest<T extends UserService> {
 
     @Test
     public void givenIdsIsEmptyAndFiveCreatedUsers_WhenGetUsers_ThenReturnListOfFive() {
+
         NewUserRequest newUserRequest1 = new NewUserRequest("user1@mail.com", "user1");
         NewUserRequest newUserRequest2 = new NewUserRequest("user2@mail.com", "user2");
         NewUserRequest newUserRequest3 = new NewUserRequest("user3@mail.com", "user3");
@@ -155,7 +147,9 @@ public class UserServiceTest<T extends UserService> {
         userService.createUser(newUserRequest3);
         userService.createUser(newUserRequest4);
         userService.createUser(newUserRequest5);
+
         List<UserDto> listOfThreeUsers = userService.getUsers(List.of(), 0, 10);
+
         assertThat(listOfThreeUsers.size(), equalTo(5));
         assertThat(listOfThreeUsers.get(0).getId(), equalTo(1L));
         assertThat(listOfThreeUsers.get(1).getId(), equalTo(2L));

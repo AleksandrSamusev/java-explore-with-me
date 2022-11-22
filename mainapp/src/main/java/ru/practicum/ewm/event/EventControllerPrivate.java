@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/users/{userId}/events")
 public class EventControllerPrivate {
-    private final EventServiceImpl eventService;
+    private final EventService eventService;
 
     @Autowired
     public EventControllerPrivate(EventServiceImpl eventService) {

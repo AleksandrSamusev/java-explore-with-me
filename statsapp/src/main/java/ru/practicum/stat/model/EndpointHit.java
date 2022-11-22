@@ -26,5 +26,4 @@ public class EndpointHit {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "date_time")
     private LocalDateTime timestamp;
-
 }

@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         validateNewCategoryDto(newCategoryDto);
         Category savedCategory = categoryRepository.save(CategoryMapper.toCategoryFromNew(newCategoryDto));
-        log.info("New category was created");
+        log.info("Category with id= {} created", savedCategory.getId());
         return CategoryMapper.toCategoryDto(savedCategory);
     }
 
@@ -62,22 +62,22 @@ public class CategoryServiceImpl implements CategoryService {
 
     private void validateCategoryDto(CategoryDto categoryDto) {
         if (categoryDto.getId() == null) {
-            log.info("Mandatory field ID is absent");
+            log.info("Category name - \"{}\".Mandatory field ID is absent", categoryDto.getName());
             throw new InvalidParameterException("Category id is absent");
         }
         if (categoryDto.getName() == null || categoryDto.getName().isBlank()) {
-            log.info("Mandatory field NAME is invalid");
+            log.info("Category id - \"{}\".Mandatory field NAME is invalid", categoryDto.getId());
             throw new InvalidParameterException("Not valid NAME parameter");
         }
         if (isCategoryExistsByName(categoryDto.getName())) {
-            log.info("Category with the name - {} already exists", categoryDto.getName());
+            log.info("Category id - \"{}\".Name - {} already exists", categoryDto.getId(), categoryDto.getName());
             throw new CategoryConflictException("Category with this name already exists");
         }
     }
 
     private void validateNewCategoryDto(NewCategoryDto newCategoryDto) {
         if (newCategoryDto.getName() == null || newCategoryDto.getName().isBlank()) {
-            log.info("Mandatory field NAME not valid");
+            log.info("Mandatory field NAME not valid. name = \"{}\"", newCategoryDto.getName());
             throw new InvalidParameterException("Not valid parameter");
         }
         if (isCategoryExistsByName(newCategoryDto.getName())) {

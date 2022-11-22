@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/admin/compilations")
 public class CompilationControllerAdmin {
-    private final CompilationServiceImpl compilationService;
+    private final CompilationService compilationService;
 
     @Autowired
     public CompilationControllerAdmin(CompilationServiceImpl compilationService) {

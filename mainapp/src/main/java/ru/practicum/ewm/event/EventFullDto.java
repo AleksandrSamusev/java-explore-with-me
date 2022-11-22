@@ -16,9 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class EventFullDto {
-
     private Long id;
     @NotNull
     private String title;

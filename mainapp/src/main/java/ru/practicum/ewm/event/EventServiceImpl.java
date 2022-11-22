@@ -143,6 +143,8 @@ public class EventServiceImpl implements EventService {
         if (tempEvent.getParticipantLimit() == 0 && !tempEvent.getRequestModeration()) {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
+            log.info("Limit - {}. Current requests - {}", tempEvent.getParticipantLimit(),
+                    tempEvent.getConfirmedRequests());
             eventRepository.save(tempEvent);
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                 == tempEvent.getParticipantLimit() && tempEvent.getParticipantLimit() != 0) {
@@ -153,9 +155,16 @@ public class EventServiceImpl implements EventService {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
             eventRepository.save(tempEvent);
-            List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
-            for (Request request : pendingRequests) {
-                requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.CONFIRMED);
+            if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
+                    == tempEvent.getParticipantLimit()) {
+                log.info("Requests limit ({}) for event - (id - {}) reached. Set all PENDING to REJECT",
+                        tempEvent.getParticipantLimit(), eventId);
+                List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
+                for (Request request : pendingRequests) {
+                    requestRepository.getReferenceById(request.getId()).setStatus(RequestStatus.REJECTED);
+                    log.info("Set request {} to REJECTED", request.getId());
+                    requestRepository.save(request);
+                }
             }
         }
         log.info("Request with id = {} from user with id = {} to event with id = {} was confirmed",
@@ -192,6 +201,8 @@ public class EventServiceImpl implements EventService {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
+        log.info("parameters: users - {}, states - {}, categories - {}, rangeStart - {}, rangeEnd - {}," +
+                " from - {}, size - {}", users, states, categories, start, end, from, size);
         return EventMapper.toEventFullDtos(eventRepository.findAllUsersEventsFull(users, categories, states,
                 start, end, pageable));
     }
@@ -246,7 +257,7 @@ public class EventServiceImpl implements EventService {
         validateEventId(eventId);
         Event tempEvent = eventRepository.getReferenceById(eventId);
         if (tempEvent.getState().equals(EventState.PUBLISHED)) {
-            log.info("Event is already published");
+            log.info("Event (id - {}) is already published", eventId);
             throw new InvalidParameterException("Denied. Event is already published");
         }
         tempEvent.setState(EventState.CANCELED);
@@ -281,6 +292,9 @@ public class EventServiceImpl implements EventService {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
+        log.info("parameters: text - {}, categories - {}, paid - {}, rangeStart - {}, rangeEnd - {}, " +
+                        "onlyAvailable - {}, sort - {}, from - {}, size - {}", text, categories, paid, start, end,
+                onlyAvailable, sort, from, size);
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
                 paid, start, end, pageable);
 
@@ -298,13 +312,16 @@ public class EventServiceImpl implements EventService {
                         end,
                         List.of(String.format("/events/%s", e.getId())),
                         false);
+                log.info("set views - {}", stats.size());
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex);
             }
             if (stats.isEmpty()) {
                 e.setViews(0);
+                log.info("set views - 0");
             } else {
                 e.setViews(stats.get(0).getHits());
+                log.info("set views - {}", stats.get(0).getHits());
             }
         });
         eventRepository.saveAll(sortedEvents);

@@ -10,7 +10,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/compilations")
 public class CompilationControllerPublic {
-    private final CompilationServiceImpl compilationService;
+    private final CompilationService compilationService;
 
     @Autowired
     public CompilationControllerPublic(CompilationServiceImpl compilationService) {

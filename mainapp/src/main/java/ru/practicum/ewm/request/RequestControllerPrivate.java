@@ -10,7 +10,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/users/{userId}/requests")
 public class RequestControllerPrivate {
-    private final RequestServiceImpl requestService;
+    private final RequestService requestService;
 
     @Autowired
     public RequestControllerPrivate(RequestServiceImpl requestService) {

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/categories")
 public class CategoryControllerAdmin {
 
-    private final CategoryServiceImpl categoryService;
+    private final CategoryService categoryService;
 
     @Autowired
     public CategoryControllerAdmin(CategoryServiceImpl categoryService) {

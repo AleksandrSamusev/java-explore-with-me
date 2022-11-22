@@ -14,13 +14,6 @@ public class CategoryMapper {
         return categoryDto;
     }
 
-    public static Category toCategory(CategoryDto categoryDto) {
-        Category category = new Category();
-        category.setId(categoryDto.getId());
-        category.setName(categoryDto.getName());
-        return category;
-    }
-
     public static Category toCategoryFromNew(NewCategoryDto newCategoryDto) {
         Category category = new Category();
         category.setName(newCategoryDto.getName());

@@ -10,7 +10,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/admin/events")
 public class EventControllerAdmin {
-    private final EventServiceImpl eventService;
+    private final EventService eventService;
 
     @Autowired
     public EventControllerAdmin(EventServiceImpl eventService) {

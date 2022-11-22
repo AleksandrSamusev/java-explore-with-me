@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -48,6 +49,7 @@ public class UserServiceImpl implements UserService {
                     .stream()
                     .map(UserMapper::toUserDto)
                     .collect(Collectors.toList());
+
         }
         log.info("Return users according to ids list");
         return userRepository.findAllUsersByIds(ids, pageable)
@@ -62,7 +64,7 @@ public class UserServiceImpl implements UserService {
             throw new InvalidParameterException("Invalid parameter");
         }
         if (newUserRequest.getEmail().isBlank() || !newUserRequest.getEmail().contains("@")) {
-            log.info("Mandatory parameter EMAIL is invalid");
+            log.info("User name - {}. Mandatory parameter EMAIL is invalid", newUserRequest.getName());
             throw new InvalidParameterException("incorrect email address");
         }
         if (isUserExistsByName(newUserRequest.getName())) {

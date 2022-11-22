@@ -10,7 +10,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/admin/users")
 public class UserControllerAdmin {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @Autowired
     public UserControllerAdmin(UserServiceImpl userService) {

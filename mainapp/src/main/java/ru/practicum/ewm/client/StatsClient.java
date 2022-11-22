@@ -30,6 +30,7 @@ public class StatsClient {
     }
 
     public void saveStats(EndpointHit endpointHit) {
+        log.info("Save statistics: app = \"{}\" , uri = \"{}\"", endpointHit.getApp(), endpointHit.getUri());
         restTemplate.postForObject("/hit", endpointHit, String.class);
     }
 
@@ -44,7 +45,9 @@ public class StatsClient {
         if (unique != null) {
             builder.append(String.format("&unique=%s", unique));
         }
+        log.info("request parameters: start - {}, end - {}, uris - {}, unique - {}", start, end, uris, unique);
         ResponseEntity<String> response = restTemplate.getForEntity(builder.toString(), String.class);
+        log.info("response status: {}", response.getStatusCode());
         String jsonString = response.getBody();
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonString, new TypeReference<>() {

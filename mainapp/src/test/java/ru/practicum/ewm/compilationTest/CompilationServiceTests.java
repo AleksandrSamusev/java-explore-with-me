@@ -35,11 +35,12 @@ public class CompilationServiceTests<T extends CompilationService> {
     @Test
     public void givenValidDto_WhenCreateCompilation_ThenCompilationCreated() {
 
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "compilation", false);
-        compilationService.createCompilation(newCompilationDto);
+        NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
+        compilationService.createCompilation(comp);
+
         List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c",
                 Compilation.class).getResultList();
+
         assertThat(compilationsFromDb.size(), equalTo(1));
         assertThat(compilationsFromDb.get(0).getTitle(), equalTo("compilation"));
         assertThat(compilationsFromDb.get(0).getEvents().size(), equalTo(0));
@@ -47,82 +48,75 @@ public class CompilationServiceTests<T extends CompilationService> {
 
     @Test
     public void givenDtoWithTitleIsNull_WhenCreateCompilation_ThenException() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                null, false);
+
+        NewCompilationDto comp = new NewCompilationDto(List.of(), null, false);
+
         assertThrows(InvalidParameterException.class,
-                () -> compilationService.createCompilation(newCompilationDto));
+                () -> compilationService.createCompilation(comp));
     }
 
     @Test
     public void givenDtoWithTitleIsBlank_WhenCreateCompilation_ThenException() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "   ", false);
+
+        NewCompilationDto comp = new NewCompilationDto(List.of(), "   ", false);
+
         assertThrows(InvalidParameterException.class,
-                () -> compilationService.createCompilation(newCompilationDto));
+                () -> compilationService.createCompilation(comp));
     }
 
     @Test
     public void givenIdExists_WhenDeleteCompilationById_ThenCompilationDeleted() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "compilation", false);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
+
+        NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
+        compilationService.createCompilation(comp);
 
         compilationService.deleteCompilationById(1L);
-        List<Compilation> compilationsFromDb2 = em.createQuery("select c from Compilation c",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb2.size(), equalTo(0));
+
+        assertThat(em.createQuery("select c from Compilation c",
+                Compilation.class).getResultList().size(), equalTo(0));
     }
 
     @Test
     public void givenIdNotExists_WhenDeleteCompilationById_ThenException() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "compilation", false);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
+
+        NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
+        compilationService.createCompilation(comp);
+
         assertThrows(CompilationNotFoundException.class,
                 () -> compilationService.deleteCompilationById(999L));
     }
 
     @Test
     public void givenIdExists_WhenFindCompilationById_ThenCompilationFound() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "compilation", false);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
-        CompilationDto compilationDto = compilationService.findCompilationByCompilationId(1L);
-        assertThat(compilationDto.getTitle(), equalTo("compilation"));
+
+        NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
+        compilationService.createCompilation(comp);
+
+        assertThat(compilationService.findCompilationByCompilationId(1L).getTitle(),
+                equalTo("compilation"));
     }
 
     @Test
     public void givenIdNotExists_WhenFindCompilationById_ThenException() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "compilation", false);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
+
+        NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
+        compilationService.createCompilation(comp);
+
         assertThrows(CompilationNotFoundException.class,
                 () -> compilationService.findCompilationByCompilationId(999L));
     }
 
     @Test
     public void givenPinnedIsTrue_WhenFindByPinned_ThenReturnListPinned() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "pinned_compilation", true);
-        compilationService.createCompilation(newCompilationDto);
 
-        NewCompilationDto newCompilationDto2 = new NewCompilationDto(List.of(),
-                "unpinned_compilation", false);
-        compilationService.createCompilation(newCompilationDto2);
+        NewCompilationDto pinned = new NewCompilationDto(List.of(), "pinned_compilation", true);
+        NewCompilationDto unpinned = new NewCompilationDto(List.of(), "unpinned_compilation", false);
+        compilationService.createCompilation(pinned);
+        compilationService.createCompilation(unpinned);
+
         List<CompilationDto> compilations = compilationService.findCompilationsByPinned(true,
                 0, 10);
+
         assertThat(compilations.size(), equalTo(1));
         assertThat(compilations.get(0).getTitle(), equalTo("pinned_compilation"));
         assertThat(compilations.get(0).getPinned(), equalTo(Boolean.TRUE));
@@ -130,86 +124,76 @@ public class CompilationServiceTests<T extends CompilationService> {
 
     @Test
     public void givenPinnedIsFalse_WhenFindByPinned_ThenReturnListUnpinned() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "pinned_compilation", true);
-        compilationService.createCompilation(newCompilationDto);
 
-        NewCompilationDto newCompilationDto2 = new NewCompilationDto(List.of(),
-                "unpinned_compilation", false);
-        compilationService.createCompilation(newCompilationDto2);
+        NewCompilationDto pinned = new NewCompilationDto(List.of(), "pinned_compilation", true);
+        NewCompilationDto unpinned = new NewCompilationDto(List.of(), "unpinned_compilation", false);
+        compilationService.createCompilation(pinned);
+        compilationService.createCompilation(unpinned);
+
         List<CompilationDto> compilations = compilationService.findCompilationsByPinned(false,
                 0, 10);
+
         assertThat(compilations.size(), equalTo(1));
         assertThat(compilations.get(0).getTitle(), equalTo("unpinned_compilation"));
         assertThat(compilations.get(0).getPinned(), equalTo(Boolean.FALSE));
     }
 
     @Test
-    public void givenPinnedIsNull_WhenFindByPinned_ThenReturnListUnpinned() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "pinned_compilation", true);
-        compilationService.createCompilation(newCompilationDto);
-        NewCompilationDto newCompilationDto2 = new NewCompilationDto(List.of(),
-                "unpinned_compilation", false);
-        compilationService.createCompilation(newCompilationDto2);
+    public void givenPinnedIsNull_WhenFindByPinned_ThenReturnListAll() {
+
+        NewCompilationDto pinned = new NewCompilationDto(List.of(), "pinned_compilation", true);
+        NewCompilationDto unpinned = new NewCompilationDto(List.of(), "unpinned_compilation", false);
+        compilationService.createCompilation(pinned);
+        compilationService.createCompilation(unpinned);
+
         List<CompilationDto> compilations = compilationService.findCompilationsByPinned(null,
                 0, 10);
+
         assertThat(compilations.size(), equalTo(2));
     }
 
     @Test
     public void givenIdExist_WhenUnpinCompilation_ThenCompilationUnpinned() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "pinned_compilation", true);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c where c.pinned IS true",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
-        assertThat(compilationsFromDb.get(0).getPinned(), equalTo(Boolean.TRUE));
+
+        NewCompilationDto pinned = new NewCompilationDto(List.of(), "pinned_compilation", true);
+        compilationService.createCompilation(pinned);
 
         compilationService.unpinCompilation(1L);
-        List<Compilation> compilationsFromDbAfter = em.createQuery("select c from Compilation c where" +
-                " c.pinned IS true", Compilation.class).getResultList();
-        assertThat(compilationsFromDbAfter.size(), equalTo(0));
+
+        assertThat(em.createQuery("select c from Compilation c where" +
+                " c.pinned IS true", Compilation.class).getResultList().size(), equalTo(0));
     }
 
     @Test
     public void givenIdNotExist_WhenUnpinCompilation_ThenException() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "pinned_compilation", true);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c where c.pinned IS true",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
 
-        assertThrows(CompilationNotFoundException.class, () -> compilationService.unpinCompilation(999L));
+        NewCompilationDto pinned = new NewCompilationDto(List.of(), "pinned_compilation", true);
+        compilationService.createCompilation(pinned);
+
+        assertThrows(CompilationNotFoundException.class,
+                () -> compilationService.unpinCompilation(999L));
     }
 
     @Test
     public void givenIdExist_WhenPinCompilation_ThenCompilationPinned() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "unpinned_compilation", false);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c where c.pinned IS false",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
-        assertThat(compilationsFromDb.get(0).getPinned(), equalTo(Boolean.FALSE));
+
+        NewCompilationDto unpinned = new NewCompilationDto(List.of(), "unpinned_compilation", false);
+        compilationService.createCompilation(unpinned);
 
         compilationService.pinCompilation(1L);
-        List<Compilation> compilationsFromDbAfter = em.createQuery("select c from Compilation c where" +
-                " c.pinned IS false", Compilation.class).getResultList();
-        assertThat(compilationsFromDbAfter.size(), equalTo(0));
+
+        assertThat(em.createQuery("select c from Compilation c where" +
+                " c.pinned IS false", Compilation.class).getResultList().size(), equalTo(0));
     }
 
     @Test
     public void givenIdNotExist_WhenPinCompilation_ThenException() {
-        NewCompilationDto newCompilationDto = new NewCompilationDto(List.of(),
-                "unpinned_compilation", false);
-        compilationService.createCompilation(newCompilationDto);
-        List<Compilation> compilationsFromDb = em.createQuery("select c from Compilation c where c.pinned IS false",
-                Compilation.class).getResultList();
-        assertThat(compilationsFromDb.get(0).getId(), equalTo(1L));
-        assertThrows(CompilationNotFoundException.class, () -> compilationService.pinCompilation(999L));
+
+        NewCompilationDto unpinned = new NewCompilationDto(List.of(), "unpinned_compilation", false);
+        compilationService.createCompilation(unpinned);
+
+        assertThrows(CompilationNotFoundException.class,
+                () -> compilationService.pinCompilation(999L));
 
     }
 }

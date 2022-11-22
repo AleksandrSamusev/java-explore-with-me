@@ -30,9 +30,11 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> findCompilationsByPinned(Boolean pinned, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
         if (pinned != null) {
+            log.info("pinned is \"{}\"", pinned);
             return CompilationMapper.toCompilationDtos(compilationRepository
                     .findAllCompilationsByPinnedState(pinned, pageable));
         } else {
+            log.info("pinned is \"{}\"", pinned);
             return CompilationMapper.toCompilationDtos(compilationRepository.findAll());
         }
     }
@@ -49,8 +51,9 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation tempCompilation = CompilationMapper.toCompilationFromNew(newCompilationDto);
         List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
         tempCompilation.setEvents(events);
-        log.info("New compilation created");
-        return CompilationMapper.toCompilationDto(compilationRepository.save(tempCompilation));
+        Compilation saved = compilationRepository.save(tempCompilation);
+        log.info("New compilation with id = \"{}\" created", saved.getId());
+        return CompilationMapper.toCompilationDto(saved);
     }
 
     @Override
@@ -111,9 +114,12 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private void validateNewCompilationDto(NewCompilationDto newCompilationDto) {
-        if (newCompilationDto.getTitle() == null || newCompilationDto.getTitle().isBlank()) {
-            log.info("Mandatory field 'title' is not valid");
-            throw new InvalidParameterException("Title parameter is not valid");
+        if (newCompilationDto.getTitle() == null) {
+            log.info("title is NULL");
+            throw new InvalidParameterException("Title parameter is NULL");
+        } else if (newCompilationDto.getTitle().isBlank()) {
+            log.info("Title parameter = \"{}\" is blank", newCompilationDto.getTitle());
+            throw new InvalidParameterException("Title parameter is BLANK");
         }
     }
 

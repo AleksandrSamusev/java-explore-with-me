@@ -60,23 +60,6 @@ public class CategoryControllerAdminTests {
                 .andExpect(jsonPath("$.name").value("category"));
     }
 
-/*    @Test
-    public void shouldReturnStatus400WhenNameIsEmpty() throws Exception {
-
-        NewCategoryDto dto = new NewCategoryDto();
-        dto.setName("");
-        Mockito.
-        when(categoryService.createCategory(dto))
-                .thenThrow(InvalidParameterException.class);
-
-        mvc.perform(post("/admin/categories")
-                        .content(mapper.writeValueAsString(dto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }*/
-
     @Test
     public void shouldReturnStatus200WhenDeleteCategory() throws Exception {
 
@@ -105,6 +88,5 @@ public class CategoryControllerAdminTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("patched category"));
-
     }
 }

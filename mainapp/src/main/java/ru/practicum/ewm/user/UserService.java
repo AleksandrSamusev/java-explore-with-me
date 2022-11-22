@@ -3,6 +3,7 @@ package ru.practicum.ewm.user;
 import java.util.List;
 
 public interface UserService {
+
     UserDto createUser(NewUserRequest newUserRequest);
 
     void deleteUserById(Long userId);

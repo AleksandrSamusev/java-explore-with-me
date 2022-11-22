@@ -12,8 +12,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/events")
 public class EventControllerPublic {
-
-    private final EventServiceImpl eventService;
+    private final EventService eventService;
 
     @Autowired
     public EventControllerPublic(EventServiceImpl eventService) {
@@ -32,6 +31,8 @@ public class EventControllerPublic {
                                                @RequestParam(defaultValue = "10") Integer size,
                                                HttpServletRequest request) {
 
+        log.info("client ip: {}", request.getRemoteAddr());
+        log.info("endpoint path: {}", request.getRequestURI());
         eventService.sentHitStat(request);
         return eventService.getSortedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort,
                 from, size, request);
@@ -39,6 +40,8 @@ public class EventControllerPublic {
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(@PathVariable Long eventId, HttpServletRequest request) throws JsonProcessingException {
+        log.info("client ip: {}", request.getRemoteAddr());
+        log.info("endpoint path: {}", request.getRequestURI());
         eventService.sentHitStat(request);
         return eventService.getEvent(eventId, request);
     }

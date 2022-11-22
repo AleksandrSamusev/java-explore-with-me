@@ -10,7 +10,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/categories")
 public class CategoryControllerPublic {
-    private final CategoryServiceImpl categoryService;
+    private final CategoryService categoryService;
 
     @Autowired
     public CategoryControllerPublic(CategoryServiceImpl categoryService) {
