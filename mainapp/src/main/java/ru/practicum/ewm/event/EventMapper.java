@@ -33,6 +33,7 @@ public class EventMapper {
         eventFullDto.setTitle(event.getTitle());
         eventFullDto.setViews(event.getViews());
         eventFullDto.setRequestModeration(event.getRequestModeration());
+        eventFullDto.setRating(event.getRating());
         return eventFullDto;
     }
 
@@ -47,6 +48,7 @@ public class EventMapper {
         eventShortDto.setConfirmedRequests(event.getConfirmedRequests());
         eventShortDto.setTitle(event.getTitle());
         eventShortDto.setViews(event.getViews());
+        eventShortDto.setRating(event.getRating());
         return eventShortDto;
     }
 

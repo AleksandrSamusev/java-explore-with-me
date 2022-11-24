@@ -115,4 +115,17 @@ public class ErrorHandler {
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleReviewNotFoundException(final ReviewNotFoundException e) {
+        ApiError apiError = new ApiError();
+        Arrays.stream(e.getStackTrace())
+                .forEach(er -> apiError.getErrors().add(er.toString()));
+        apiError.setStatus(HttpStatus.NOT_FOUND.name());
+        apiError.setMessage(e.getMessage());
+        apiError.setReason("Not found");
+        apiError.setTimestamp(Timestamp.from(Instant.now()));
+        return apiError;
+    }
 }

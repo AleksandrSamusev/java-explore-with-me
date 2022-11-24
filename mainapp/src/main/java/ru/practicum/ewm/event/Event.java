@@ -3,6 +3,7 @@ package ru.practicum.ewm.event;
 import lombok.Data;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.compilation.Compilation;
+import ru.practicum.ewm.review.Review;
 import ru.practicum.ewm.user.User;
 
 import javax.persistence.*;
@@ -69,5 +70,11 @@ public class Event {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "events")
     private List<Compilation> compilations;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "reviews")
+    private List<Review> reviews;
+
+    @Column(name = "rating")
+    private Float rating;
 
 }

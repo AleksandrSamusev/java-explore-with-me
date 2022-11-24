@@ -32,5 +32,6 @@ public class EventShortDto {
     @NotNull
     private String title;
     private Integer views;
+    private Float rating;
 
 }
