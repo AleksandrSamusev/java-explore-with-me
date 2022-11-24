@@ -75,6 +75,5 @@ public class Event {
     private List<Review> reviews;
 
     @Column(name = "rating")
-    private Float rating;
-
+    private double rating;
 }

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.ewm.event.EventShortDto;
+import ru.practicum.ewm.user.UserShortDto;
 
 import java.time.LocalDateTime;
 
@@ -13,9 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ShortReviewDto {
-    private String reviewerName;
+public class FullReviewDto {
+    private Long id;
+    private EventShortDto event;
+    private UserShortDto reviewer;
     private Boolean review;
     private String comment;
     private LocalDateTime created;
+
 }
