@@ -4,10 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
-import ru.practicum.ewm.exception.EventNotFoundException;
-import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.ReviewNotFoundException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.*;
+import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.user.UserRepository;
 
 import java.util.List;
@@ -19,11 +17,13 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
 
-    public ReviewServiceImpl(ReviewRepository reviewRepository, EventRepository eventRepository, UserRepository userRepository) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository, EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository) {
         this.reviewRepository = reviewRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.requestRepository = requestRepository;
     }
 
 
@@ -50,19 +50,31 @@ public class ReviewServiceImpl implements ReviewService {
     public NewReviewDto createReview(NewReviewDto newReviewDto, Long userId, Long eventId) {
         validateEventId(eventId);
         validateUserId(userId);
+
+        // check if user has a confirmed request to this event (if user is participant)
+
+        if (requestRepository.findAllConfirmedRequestsByEventId(eventId).stream()
+                .noneMatch(request -> request.getRequesterId().equals(userId))) {
+            log.info("user (id - {}) not a participant of event (id - {})", userId, eventId);
+            throw new ForbiddenException("Only participant can create review");
+        }
+
+        //...if is participant - create review
+
         Review review = ReviewMapper.toReview(newReviewDto);
         review.setReviewer(userRepository.getReferenceById(userId));
         review.setEvent(eventRepository.getReferenceById(eventId));
         NewReviewDto dto = ReviewMapper.toNewReviewDto(reviewRepository.save(review));
         log.info("review (id = {}) created", dto.getId());
 
-        //set new rating
+        //set new rating to event
 
         Event event = eventRepository.getReferenceById(eventId);
+        double currentRating = event.getRating();
         event.setRating(calculateEventRating(eventId));
         eventRepository.save(event);
-        log.info("new rating calculated: eventId - {}, rating - {}", eventId, event.getRating());
-
+        log.info("new rating calculated: eventId - {}, current rating - {},  new rating - {}",
+                eventId, currentRating, event.getRating());
         return dto;
     }
 

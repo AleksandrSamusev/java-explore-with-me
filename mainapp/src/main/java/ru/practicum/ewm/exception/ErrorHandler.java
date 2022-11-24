@@ -128,4 +128,17 @@ public class ErrorHandler {
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleForbiddenException(final ForbiddenException e) {
+        ApiError apiError = new ApiError();
+        Arrays.stream(e.getStackTrace())
+                .forEach(er -> apiError.getErrors().add(er.toString()));
+        apiError.setStatus(HttpStatus.FORBIDDEN.name());
+        apiError.setMessage(e.getMessage());
+        apiError.setReason("Forbidden");
+        apiError.setTimestamp(Timestamp.from(Instant.now()));
+        return apiError;
+    }
 }
