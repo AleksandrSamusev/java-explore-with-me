@@ -13,7 +13,7 @@ public class EventControllerAdmin {
     private final EventService eventService;
 
     @Autowired
-    public EventControllerAdmin(EventServiceImpl eventService) {
+    public EventControllerAdmin(EventService eventService) {
         this.eventService = eventService;
     }
 

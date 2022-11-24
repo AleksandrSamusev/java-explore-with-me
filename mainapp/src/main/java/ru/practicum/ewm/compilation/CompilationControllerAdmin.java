@@ -11,7 +11,7 @@ public class CompilationControllerAdmin {
     private final CompilationService compilationService;
 
     @Autowired
-    public CompilationControllerAdmin(CompilationServiceImpl compilationService) {
+    public CompilationControllerAdmin(CompilationService compilationService) {
         this.compilationService = compilationService;
     }
 

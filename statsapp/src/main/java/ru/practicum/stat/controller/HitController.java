@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.stat.model.EndpointHit;
 import ru.practicum.stat.model.ViewStats;
 import ru.practicum.stat.service.HitService;
-import ru.practicum.stat.service.HitServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +17,7 @@ public class HitController {
     private final HitService hitService;
 
     @Autowired
-    public HitController(HitServiceImpl hitService) {
+    public HitController(HitService hitService) {
         this.hitService = hitService;
     }
 

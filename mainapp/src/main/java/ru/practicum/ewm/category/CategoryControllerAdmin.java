@@ -12,7 +12,7 @@ public class CategoryControllerAdmin {
     private final CategoryService categoryService;
 
     @Autowired
-    public CategoryControllerAdmin(CategoryServiceImpl categoryService) {
+    public CategoryControllerAdmin(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

@@ -10,10 +10,11 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/categories")
 public class CategoryControllerPublic {
+
     private final CategoryService categoryService;
 
     @Autowired
-    public CategoryControllerPublic(CategoryServiceImpl categoryService) {
+    public CategoryControllerPublic(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

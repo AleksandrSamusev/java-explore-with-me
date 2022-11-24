@@ -13,7 +13,7 @@ public class RequestControllerPrivate {
     private final RequestService requestService;
 
     @Autowired
-    public RequestControllerPrivate(RequestServiceImpl requestService) {
+    public RequestControllerPrivate(RequestService requestService) {
         this.requestService = requestService;
     }
 

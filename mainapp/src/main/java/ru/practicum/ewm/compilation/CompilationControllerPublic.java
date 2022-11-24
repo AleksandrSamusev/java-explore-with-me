@@ -13,7 +13,7 @@ public class CompilationControllerPublic {
     private final CompilationService compilationService;
 
     @Autowired
-    public CompilationControllerPublic(CompilationServiceImpl compilationService) {
+    public CompilationControllerPublic(CompilationService compilationService) {
         this.compilationService = compilationService;
     }
 

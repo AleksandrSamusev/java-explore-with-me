@@ -13,7 +13,7 @@ public class UserControllerAdmin {
     private final UserService userService;
 
     @Autowired
-    public UserControllerAdmin(UserServiceImpl userService) {
+    public UserControllerAdmin(UserService userService) {
         this.userService = userService;
     }
 

@@ -14,7 +14,7 @@ public class EventControllerPrivate {
     private final EventService eventService;
 
     @Autowired
-    public EventControllerPrivate(EventServiceImpl eventService) {
+    public EventControllerPrivate(EventService eventService) {
         this.eventService = eventService;
     }
 
