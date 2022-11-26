@@ -271,22 +271,22 @@ public class EventServiceImpl implements EventService {
                                                String sort, Integer from, Integer size,
                                                HttpServletRequest request) {
 
-        String sorting;
-        if (sort.equals(EventSortType.EVENT_DATE.toString())) {
-            sorting = "eventDate";
-        } else if (sort.equals(EventSortType.VIEWS.toString())) {
-            sorting = "views";
-        } else {
-            sorting = "id";
+        String sorting = "id";
+        if (sort != null) {
+            if (sort.equals(EventSortType.EVENT_DATE.toString())) {
+                sorting = "eventDate";
+            } else if (sort.equals(EventSortType.VIEWS.toString())) {
+                sorting = "views";
+            }
         }
         LocalDateTime start;
-        if (rangeStart.equals("null")) {
+        if (rangeStart == null) {
             start = LocalDateTime.now();
         } else {
             start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         LocalDateTime end;
-        if (rangeEnd.equals("null")) {
+        if (rangeEnd == null) {
             end = LocalDateTime.now().plusYears(100);
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -306,10 +306,12 @@ public class EventServiceImpl implements EventService {
             }
         }
         sortedEvents.forEach(e -> {
-            List<ViewStats> stats = null;
+            LocalDateTime statStart = LocalDateTime.now().minusYears(100);
+            LocalDateTime statsEnd = LocalDateTime.now();
+            List<ViewStats> stats;
             try {
-                stats = statsClient.getStats(start,
-                        end,
+                stats = statsClient.getStats(statStart,
+                        statsEnd,
                         List.of(String.format("/events/%s", e.getId())),
                         false);
                 log.info("set views - {}", stats.size());

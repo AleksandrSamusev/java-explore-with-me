@@ -71,7 +71,7 @@ public class Event {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "events")
     private List<Compilation> compilations;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "reviews")
+    @OneToMany
     private List<Review> reviews;
 
     @Column(name = "rating")

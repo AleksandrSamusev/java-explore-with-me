@@ -17,16 +17,15 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_id")
     private Long id;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "reviewer_id")
     private User reviewer;
 
     @NotNull

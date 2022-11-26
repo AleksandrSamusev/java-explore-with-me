@@ -20,27 +20,24 @@ public class EventControllerPublic {
     }
 
     @GetMapping
-    public List<EventShortDto> getSortedEvents(@RequestParam String text,
-                                               @RequestParam List<Long> categories,
-                                               @RequestParam Boolean paid,
-                                               @RequestParam(defaultValue = "null") String rangeStart,
-                                               @RequestParam(defaultValue = "null") String rangeEnd,
-                                               @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-                                               @RequestParam(defaultValue = "id") String sort,
-                                               @RequestParam(defaultValue = "0") Integer from,
-                                               @RequestParam(defaultValue = "10") Integer size,
+    public List<EventShortDto> getSortedEvents(@RequestParam(required = false) String text,
+                                               @RequestParam(required = false) List<Long> categories,
+                                               @RequestParam(required = false) Boolean paid,
+                                               @RequestParam(required = false) String rangeStart,
+                                               @RequestParam(required = false) String rangeEnd,
+                                               @RequestParam(required = false,
+                                                       defaultValue = "false") Boolean onlyAvailable,
+                                               @RequestParam(required = false) String sort,
+                                               @RequestParam(required = false, defaultValue = "0") Integer from,
+                                               @RequestParam(required = false, defaultValue = "10") Integer size,
                                                HttpServletRequest request) {
 
-        log.info("client ip: {}, endpoint path: {}", request.getRemoteAddr(), request.getRequestURI());
-        eventService.sentHitStat(request);
         return eventService.getSortedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort,
                 from, size, request);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(@PathVariable Long eventId, HttpServletRequest request) throws JsonProcessingException {
-        log.info("client ip: {}, endpoint path: {}", request.getRemoteAddr(), request.getRequestURI());
-        eventService.sentHitStat(request);
         return eventService.getEvent(eventId, request);
     }
 
