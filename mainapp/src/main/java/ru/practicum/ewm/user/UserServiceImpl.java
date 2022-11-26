@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
-        if (ids.isEmpty()) {
+        if (ids == null || ids.isEmpty()) {
             log.info("return all users");
             return userRepository.findAll(pageable)
                     .stream()

@@ -17,10 +17,6 @@ import javax.validation.constraints.NotNull;
 public class NewReviewDto {
     private Long id;
     @NotNull
-    private Long eventId;
-    @NotNull
-    private Long reviewerId;
-    @NotNull
     private Boolean review;
     @Length(max = 2000)
     private String comment;

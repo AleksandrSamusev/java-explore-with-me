@@ -22,10 +22,8 @@ public class ReviewMapper {
     public static NewReviewDto toNewReviewDto(Review review) {
         NewReviewDto newReviewDto = new NewReviewDto();
         newReviewDto.setId(review.getId());
-        newReviewDto.setReviewerId(review.getReviewer().getId());
         newReviewDto.setReview(review.getReview());
         newReviewDto.setComment(review.getComment());
-        newReviewDto.setEventId(review.getEvent().getId());
         return newReviewDto;
     }
 

@@ -16,4 +16,5 @@ public class UserShortDto {
     private Long id;
     @NotNull
     private String name;
+    private double rating;
 }

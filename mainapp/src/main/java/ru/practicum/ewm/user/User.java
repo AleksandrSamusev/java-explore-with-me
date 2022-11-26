@@ -20,4 +20,7 @@ public class User {
     @Column(name = "email", nullable = false)
     @Email
     private String email;
+
+    @Column(name = "rating")
+    private double rating;
 }

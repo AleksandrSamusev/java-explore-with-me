@@ -19,4 +19,5 @@ public class UserDto {
     @Email
     @NotNull
     private String email;
+    private double rating;
 }
