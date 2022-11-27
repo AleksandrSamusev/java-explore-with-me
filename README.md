@@ -36,11 +36,11 @@
 
 ### ER диаграмма
 
-![ER-диаграмма](https://github.com/AleksandrSamusev/java-explore-with-me/blob/ea9f4c993bd798a85d713ab2ba54e76408303df1/mainapp/src/main/resources/img/ER-diagramm(EWM).jpg)
+![ER-диаграмма](https://github.com/AleksandrSamusev/java-explore-with-me/blob/feature/mainapp/src/main/resources/img/er-diagramm(EWM).jpg?raw=true)
 
 ### Диаграмма компонентов
 
-![диаграмма компонентов](https://github.com/AleksandrSamusev/java-explore-with-me/blob/ea9f4c993bd798a85d713ab2ba54e76408303df1/mainapp/src/main/resources/img/components_diagramm.png)
+![диаграмма компонентов](https://github.com/AleksandrSamusev/java-explore-with-me/blob/feature/mainapp/src/main/resources/img/components_diagramm.png?raw=true)
 
 ### Дополнительная функциональность (рейтинги)
 
@@ -86,4 +86,4 @@
 
 ### ER диаграмма с дополнительной функиональностью
 
-![ER-диаграмма-с-дополнительной-функиональностью](https://github.com/AleksandrSamusev/java-explore-with-me/blob/ea9f4c993bd798a85d713ab2ba54e76408303df1/mainapp/src/main/resources/img/er-diagramm(feature).jpg)
+![ER-диаграмма-с-дополнительной-функиональностью](https://github.com/AleksandrSamusev/java-explore-with-me/blob/feature/mainapp/src/main/resources/img/er-diagramm(feature).jpg?raw=true)
