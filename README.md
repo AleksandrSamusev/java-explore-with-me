@@ -87,3 +87,11 @@
 ### ER диаграмма с дополнительной функиональностью
 
 ![ER-диаграмма-с-дополнительной-функиональностью](https://github.com/AleksandrSamusev/java-explore-with-me/blob/feature/mainapp/src/main/resources/img/er-diagramm(feature).jpg?raw=true)
+
+### Эндпоинты для работы с дополнительной функциональностью:
+
+- **GET**  /users/events/{eventId}/reviews - получение всех ревью на событие
+- **GET**  /users/{userId}/reviews - получение всех ревью пользователя
+- **GET**  /users/{userId}/events/{eventId}/reviews - получение ревью пользователя на событие
+- **POST** /users/{userId}/events/{eventId}/reviews - опубликовать ревью на событие
+- **PATCH** /users/{userId}/reviews - изменить ревью (только текст)

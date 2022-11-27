@@ -1,7 +1,10 @@
 package ru.practicum.ewm.request;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.client.StatsClient;
+import ru.practicum.ewm.client.model.ViewStats;
 import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.event.EventState;
@@ -20,12 +23,14 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final StatsClient statsClient;
 
     public RequestServiceImpl(RequestRepository requestRepository, UserRepository userRepository,
-                              EventRepository eventRepository) {
+                              EventRepository eventRepository, StatsClient statsClient) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
+        this.statsClient = statsClient;
     }
 
     @Override
@@ -38,7 +43,9 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto createRequestFromCurrentUser(Long userId, Long eventId) {
         validateUserId(userId);
         validateEventId(eventId);
+
         List<Request> usersRequests = requestRepository.findAllRequestsByUserId(userId);
+
         for (Request request : usersRequests) {
             if (request.getEventId().equals(eventId) && (request.getStatus().equals(RequestStatus.PENDING) ||
                     (request.getStatus().equals(RequestStatus.CONFIRMED)))) {
@@ -46,6 +53,7 @@ public class RequestServiceImpl implements RequestService {
                 throw new InvalidParameterException("Denied. Request already created");
             }
         }
+
         if (eventRepository.getReferenceById(eventId).getInitiator().getId().equals(userId)) {
             log.info("Request was not created. User with id = {} is an initiator of the event with id = {}",
                     userId, eventId);
@@ -61,12 +69,14 @@ public class RequestServiceImpl implements RequestService {
             log.info("Request from user with id = {} was not created. Participants limit to event with id = {} reached",
                     userId, eventId);
             throw new InvalidParameterException("Denied. Participants limit reached.");
+
         } else {
 
             Request request = new Request();
             request.setRequesterId(userId);
             request.setCreated(LocalDateTime.now());
             request.setEventId(eventId);
+
             if (eventRepository.getReferenceById(eventId).getRequestModeration().equals(Boolean.TRUE)) {
                 request.setStatus(RequestStatus.PENDING);
             } else {
@@ -74,6 +84,12 @@ public class RequestServiceImpl implements RequestService {
                 Event eventForSave = eventRepository.getReferenceById(eventId);
                 eventForSave.setConfirmedRequests(eventForSave.getConfirmedRequests() + 1);
                 eventRepository.save(eventForSave);
+
+                Event event = eventRepository.getReferenceById(eventId);
+                double rating = round(((double) event.getConfirmedRequests()
+                        / countUniqueViews(eventId) * 100), 2);
+                event.setRating(rating);
+                eventRepository.save(event);
             }
             log.info("Request from user with id = {} to event with id = {} was created", userId, eventId);
             return RequestMapper.toParticipationRequestDto(requestRepository.save(request));
@@ -119,5 +135,34 @@ public class RequestServiceImpl implements RequestService {
             log.info("Request with id = {} not found", requestId);
             throw new RequestNotFoundException("Request not found");
         }
+    }
+
+    private int countUniqueViews(Long eventId) {
+        List<ViewStats> stats;
+        int views;
+        try {
+            stats = statsClient.getStats(
+                    eventRepository.getReferenceById(eventId).getPublishedOn(),
+                    LocalDateTime.now(),
+                    List.of("/events/" + eventId),
+                    true);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        }
+        if (stats.isEmpty()) {
+            views = 0;
+        } else {
+            views = stats.size();
+        }
+        log.info("VIEWS = {}", views);
+        return views;
+    }
+
+    private double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
     }
 }

@@ -18,12 +18,12 @@ public class EventControllerAdmin {
     }
 
     @GetMapping
-    public List<EventFullDto> findAllUsersEventsFull(@RequestParam List<Long> users,
-                                                     @RequestParam(defaultValue = "PUBLISHED," +
+    public List<EventFullDto> findAllUsersEventsFull(@RequestParam(required = false) List<Long> users,
+                                                     @RequestParam(required = false, defaultValue = "PUBLISHED," +
                                                              " PENDING, CANCELED") List<EventState> states,
-                                                     @RequestParam List<Long> categories,
-                                                     @RequestParam(defaultValue = "null") String rangeStart,
-                                                     @RequestParam(defaultValue = "null") String rangeEnd,
+                                                     @RequestParam(required = false) List<Long> categories,
+                                                     @RequestParam(required = false, defaultValue = "null") String rangeStart,
+                                                     @RequestParam(required = false, defaultValue = "null") String rangeEnd,
                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
                                                      @RequestParam(required = false, defaultValue = "10") Integer size) {
         return eventService.findAllUsersEventsFull(users, states, categories, rangeStart, rangeEnd, from, size);

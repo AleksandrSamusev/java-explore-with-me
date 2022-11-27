@@ -295,6 +295,7 @@ public class EventServiceImpl implements EventService {
         log.info("parameters: text - {}, categories - {}, paid - {}, rangeStart - {}, rangeEnd - {}, " +
                         "onlyAvailable - {}, sort - {}, from - {}, size - {}", text, categories, paid, start, end,
                 onlyAvailable, sort, from, size);
+
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
                 paid, start, end, pageable);
 
@@ -327,25 +328,19 @@ public class EventServiceImpl implements EventService {
             }
         });
         eventRepository.saveAll(sortedEvents);
+
         sentHitStat(request);
 
         return EventMapper.toEventShortDtos(sortedEvents);
     }
 
     @Override
-    public EventFullDto getEvent(Long eventId, HttpServletRequest request) throws JsonProcessingException {
+    public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new EventNotFoundException("Event not found"));
-        List<String> uris = List.of(request.getRequestURI());
-        List<ViewStats> stats = statsClient.getStats(LocalDateTime.now(),
-                LocalDateTime.now(), uris, true);
-        int hits = 0;
-        for (ViewStats viewStats : stats) {
-            if (viewStats.getApp().equals("mainApp")) {
-                hits = hits + viewStats.getHits();
-            }
-        }
-        event.setViews(hits);
+        String uri = request.getRequestURI();
+
+        event.setViews(countNotUniqueViews(eventId, uri));
         eventRepository.save(event);
         sentHitStat(request);
         return EventMapper.toEventFullDto(event);
@@ -416,5 +411,26 @@ public class EventServiceImpl implements EventService {
             log.info("Title should be more then 3 chars and less then 120");
             throw new InvalidParameterException("title does not meet the requirements");
         }
+    }
+
+    private int countNotUniqueViews(Long eventId, String uri) {
+        List<ViewStats> stats;
+        int views;
+        try {
+            stats = statsClient.getStats(
+                    eventRepository.getReferenceById(eventId).getPublishedOn(),
+                    LocalDateTime.now(),
+                    List.of(uri),
+                    false);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        }
+        if (stats.isEmpty()) {
+            views = 0;
+        } else {
+            views = stats.get(0).getHits();
+        }
+        log.info("VIEWS = {}", views);
+        return views;
     }
 }

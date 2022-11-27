@@ -24,7 +24,7 @@ public class User {
     @Column(name = "rating")
     private double rating;
 
-    @Column(name = "rang")
+    @Column(name = "rank")
     @Enumerated(EnumType.STRING)
     private UserRank rang;
 }
