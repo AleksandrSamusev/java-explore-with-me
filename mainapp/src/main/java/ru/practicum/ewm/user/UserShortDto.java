@@ -17,4 +17,5 @@ public class UserShortDto {
     @NotNull
     private String name;
     private double rating;
+    private UserRank rang;
 }

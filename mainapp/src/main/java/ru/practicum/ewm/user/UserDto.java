@@ -20,4 +20,6 @@ public class UserDto {
     @NotNull
     private String email;
     private double rating;
+    private UserRank rang;
+
 }
