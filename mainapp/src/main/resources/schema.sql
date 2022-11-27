@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS events
     lat                float,
     lon                float,
     views              BIGINT,
-    rating double precision
+    rating             double precision,
+    rating_flag        boolean
 );
 
 CREATE TABLE IF NOT EXISTS requests

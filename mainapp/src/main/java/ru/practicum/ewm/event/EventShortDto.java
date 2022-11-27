@@ -33,5 +33,5 @@ public class EventShortDto {
     private String title;
     private Integer views;
     private double rating;
-
+    private boolean ratingFlag;
 }

@@ -45,4 +45,5 @@ public class EventFullDto {
     private long confirmedRequests;
     private Integer views;
     private double rating;
+    private boolean ratingFlag;
 }

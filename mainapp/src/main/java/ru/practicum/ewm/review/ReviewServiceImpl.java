@@ -8,6 +8,7 @@ import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,13 +52,10 @@ public class ReviewServiceImpl implements ReviewService {
         validateEventId(eventId);
         validateUserId(userId);
 
-        if (!userRepository.existsById(userId)) {
-            log.info("user (id - {}) not found", userId);
-            throw new UserNotFoundException("User not found");
-        }
-        if (!eventRepository.existsById(eventId)) {
-            log.info("event (id - {}) not found", eventId);
-            throw new EventNotFoundException("Event not found");
+        //check if event took place
+        if (eventRepository.getReferenceById(eventId).getEventDate().isAfter(LocalDateTime.now())) {
+            log.info("the event (id - {}) has not happened yet", eventId);
+            throw new ForbiddenException("the event has not happened yet");
         }
 
         // check if user has a confirmed request to this event (if user is participant)

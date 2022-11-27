@@ -60,6 +60,7 @@ public class EventServiceImpl implements EventService {
         event.setInitiator(user);
         event.setCategory(category);
         event.setAvailable(true);
+        event.setRatingFlag(true);
         Event saved = eventRepository.save(event);
         log.info("New event from user with id = {} created", userId);
         return EventMapper.toEventFullDto(saved);
@@ -138,14 +139,25 @@ public class EventServiceImpl implements EventService {
         validateUserId(userId);
         validateEventId(eventId);
         validateRequestId(requestId);
+
         Request tempRequest = requestRepository.getReferenceById(requestId);
         Event tempEvent = eventRepository.getReferenceById(eventId);
+
         if (tempEvent.getParticipantLimit() == 0 && !tempEvent.getRequestModeration()) {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
             log.info("Limit - {}. Current requests - {}", tempEvent.getParticipantLimit(),
                     tempEvent.getConfirmedRequests());
             eventRepository.save(tempEvent);
+
+            if (!eventRepository.getReferenceById(eventId).getRatingFlag().equals(Boolean.FALSE)) {
+                Event event = eventRepository.getReferenceById(eventId);
+                double rating = round(((double) event.getConfirmedRequests()
+                        / countUniqueViews(eventId) * 100), 2);
+                event.setRating(rating);
+                eventRepository.save(event);
+            }
+
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                 == tempEvent.getParticipantLimit() && tempEvent.getParticipantLimit() != 0) {
             log.info("Request with id = {} was not confirmed. Participants limit to event with id = {} reached",
@@ -155,8 +167,22 @@ public class EventServiceImpl implements EventService {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
             eventRepository.save(tempEvent);
+
+            if (!eventRepository.getReferenceById(eventId).getRatingFlag().equals(Boolean.FALSE)) {
+                Event event = eventRepository.getReferenceById(eventId);
+                double rating = round(((double) event.getConfirmedRequests()
+                        / countUniqueViews(eventId) * 100), 2);
+                event.setRating(rating);
+                eventRepository.save(event);
+            }
+
             if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                     == tempEvent.getParticipantLimit()) {
+
+                Event event = eventRepository.getReferenceById(eventId);
+                event.setRatingFlag(Boolean.FALSE);
+                eventRepository.save(event);
+
                 log.info("Requests limit ({}) for event - (id - {}) reached. Set all PENDING to REJECT",
                         tempEvent.getParticipantLimit(), eventId);
                 List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
@@ -432,5 +458,34 @@ public class EventServiceImpl implements EventService {
         }
         log.info("VIEWS = {}", views);
         return views;
+    }
+
+    private int countUniqueViews(Long eventId) {
+        List<ViewStats> stats;
+        int views;
+        try {
+            stats = statsClient.getStats(
+                    eventRepository.getReferenceById(eventId).getPublishedOn(),
+                    LocalDateTime.now(),
+                    List.of("/events/" + eventId),
+                    true);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        }
+        if (stats.isEmpty()) {
+            views = 0;
+        } else {
+            views = stats.size();
+        }
+        log.info("VIEWS = {}", views);
+        return views;
+    }
+
+    private double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
     }
 }

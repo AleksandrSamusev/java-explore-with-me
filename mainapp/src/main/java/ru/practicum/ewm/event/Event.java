@@ -76,4 +76,7 @@ public class Event {
 
     @Column(name = "rating")
     private double rating;
+
+    @Column(name = "rating_flag")
+    private Boolean ratingFlag;
 }
