@@ -26,5 +26,5 @@ public class User {
 
     @Column(name = "rank")
     @Enumerated(EnumType.STRING)
-    private UserRank rang;
+    private UserRank rank;
 }

@@ -6,6 +6,7 @@ import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.exception.*;
 import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.user.User;
+import ru.practicum.ewm.user.UserRank;
 import ru.practicum.ewm.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -82,6 +83,20 @@ public class ReviewServiceImpl implements ReviewService {
         review.setEvent(eventRepository.getReferenceById(eventId));
         NewReviewDto dto = ReviewMapper.toNewReviewDto(reviewRepository.save(review));
         log.info("review (id = {}) created", dto.getId());
+
+        //...calculate user rank
+        List<Review> list = reviewRepository.findAllUsersReviews(userId);
+        User tempUser = userRepository.getReferenceById(userId);
+        if (list.size() > 0 && list.size() <= 10) {
+            tempUser.setRank(UserRank.NOVICE);
+        } else if (list.size() > 10 && list.size() <= 20) {
+            tempUser.setRank(UserRank.EXPERIENCED);
+        } else if (list.size() > 20 && list.size() <= 30) {
+            tempUser.setRank(UserRank.SPECIALIST);
+        } else if (list.size() > 30) {
+            tempUser.setRank(UserRank.EXPERT);
+        }
+        userRepository.save(tempUser);
 
         //set new rating to event initiator
         User user = userRepository.getReferenceById(eventRepository.getReferenceById(eventId).getInitiator().getId());
