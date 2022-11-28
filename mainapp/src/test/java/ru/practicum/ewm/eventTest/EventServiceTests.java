@@ -13,16 +13,13 @@ import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.location.Location;
-import ru.practicum.ewm.request.ParticipationRequestDto;
 import ru.practicum.ewm.request.RequestService;
-import ru.practicum.ewm.request.RequestStatus;
 import ru.practicum.ewm.user.NewUserRequest;
 import ru.practicum.ewm.user.UserService;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -722,73 +719,6 @@ public class EventServiceTests<T extends EventService> {
     }
 
     @Test
-    public void givenIdsExisting_WhenFindAllRequestsByIds_ThenListReturned() {
-
-        NewUserRequest user2 = new NewUserRequest("user2@user.com", "user2");
-        userService.createUser(user2);
-
-        NewEventDto event = NewEventDto.builder()
-                .eventDate(LocalDateTime.now().plusHours(5L))
-                .title("Great event with a lot of interesting staff to look at")
-                .paid(false)
-                .annotation("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting.")
-                .category(1L)
-                .description("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting. Do not miss it!")
-                .location(new Location(12.12f, 23.22f))
-                .requestModeration(false)
-                .participantLimit(0)
-                .build();
-
-        ParticipationRequestDto request = new ParticipationRequestDto();
-        request.setRequester(2L);
-        request.setEvent(1L);
-
-        eventService.createEvent(1L, event);
-        eventService.publishEvent(1L);
-        requestService.createRequestFromCurrentUser(2L, 1L);
-
-        List<ParticipationRequestDto> list = eventService.findAllRequestsByUserIdAndEventId(1L, 1L);
-
-        assertThat(list.size(), equalTo(1));
-        assertThat(list.get(0).getEvent(), equalTo(1L));
-        assertThat(list.get(0).getRequester(), equalTo(2L));
-    }
-
-    @Test
-    public void givenIdNotInitiator_WhenFindAllRequestsByIds_ThenException() {
-
-        NewUserRequest newUserRequest2 = new NewUserRequest("user2@user.com", "user2");
-        userService.createUser(newUserRequest2);
-
-        NewEventDto event = NewEventDto.builder()
-                .eventDate(LocalDateTime.now().plusHours(5L))
-                .title("Great event with a lot of interesting staff to look at")
-                .paid(false)
-                .annotation("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting.")
-                .category(1L)
-                .description("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting. Do not miss it!")
-                .location(new Location(12.12f, 23.22f))
-                .requestModeration(false)
-                .participantLimit(0)
-                .build();
-
-        ParticipationRequestDto request = new ParticipationRequestDto();
-        request.setRequester(2L);
-        request.setEvent(1L);
-
-        eventService.createEvent(1L, event);
-        eventService.publishEvent(1L);
-        requestService.createRequestFromCurrentUser(2L, 1L);
-
-        assertThrows(InvalidParameterException.class,
-                () -> eventService.findAllRequestsByUserIdAndEventId(2L, 1L));
-    }
-
-    @Test
     public void givenPendingEvent_WhenRejectEvent_ThenEventRejected() {
 
         NewUserRequest newUserRequest2 = new NewUserRequest("user2@user.com", "user2");
@@ -860,72 +790,4 @@ public class EventServiceTests<T extends EventService> {
         assertThat(dto.getId(), equalTo(1L));
     }
 
-    @Test
-    public void givenValidEntities_WhenConfirmRequestByIds_ThenRequestConfirmed() {
-
-        NewUserRequest user = new NewUserRequest("user2@user.com", "user2");
-
-        NewEventDto event = NewEventDto.builder()
-                .eventDate(LocalDateTime.now().plusHours(5L))
-                .title("Great event with a lot of interesting staff to look at")
-                .paid(false)
-                .annotation("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting.")
-                .category(1L)
-                .description("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting. Do not miss it!")
-                .location(new Location(12.12f, 23.22f))
-                .requestModeration(false)
-                .participantLimit(0)
-                .build();
-
-        ParticipationRequestDto request = new ParticipationRequestDto();
-        request.setRequester(2L);
-        request.setEvent(1L);
-
-        userService.createUser(user);
-        eventService.createEvent(1L, event);
-        eventService.publishEvent(1L);
-        requestService.createRequestFromCurrentUser(2L, 1L);
-
-        eventService.confirmAnotherRequestToUsersEvent(2L, 1L, 1L);
-
-        assertThat(eventService.confirmAnotherRequestToUsersEvent(2L, 1L, 1L)
-                .getStatus(), equalTo(RequestStatus.CONFIRMED));
-    }
-
-
-    @Test
-    public void givenValidEntities_WhenRejectRequestByIds_ThenRequestRejected() {
-
-        NewUserRequest user = new NewUserRequest("user2@user.com", "user2");
-
-        NewEventDto event = NewEventDto.builder()
-                .eventDate(LocalDateTime.now().plusHours(5L))
-                .title("Great event with a lot of interesting staff to look at")
-                .paid(false)
-                .annotation("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting.")
-                .category(1L)
-                .description("Great event with a lot of interesting staff to look at." +
-                        " You will see many interesting. Do not miss it!")
-                .location(new Location(12.12f, 23.22f))
-                .requestModeration(false)
-                .participantLimit(0)
-                .build();
-
-        ParticipationRequestDto request = new ParticipationRequestDto();
-        request.setRequester(2L);
-        request.setEvent(1L);
-
-        userService.createUser(user);
-        eventService.createEvent(1L, event);
-        eventService.publishEvent(1L);
-        requestService.createRequestFromCurrentUser(2L, 1L);
-
-        eventService.rejectAnotherRequestToUsersEvent(2L, 1L, 1L);
-
-        assertThat(eventService.rejectAnotherRequestToUsersEvent(2L, 1L, 1L)
-                .getStatus(), equalTo(RequestStatus.REJECTED));
-    }
 }

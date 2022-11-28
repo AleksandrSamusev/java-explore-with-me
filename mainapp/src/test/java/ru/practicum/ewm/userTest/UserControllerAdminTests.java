@@ -30,7 +30,7 @@ public class UserControllerAdminTests {
 
     @Autowired
     private MockMvc mvc;
-    private final UserDto userDto = new UserDto(1L, "John", "john@joseph.com");
+    private final UserDto userDto = new UserDto(1L, "John", "john@joseph.com", 0, null);
 
     @Test
     public void createNewUserTest() throws Exception {
