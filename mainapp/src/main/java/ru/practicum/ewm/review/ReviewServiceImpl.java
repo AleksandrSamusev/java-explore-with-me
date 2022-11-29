@@ -9,7 +9,6 @@ import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRank;
 import ru.practicum.ewm.user.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,10 +53,10 @@ public class ReviewServiceImpl implements ReviewService {
         validateUserId(userId);
 
         //check if event took place
-        if (eventRepository.getReferenceById(eventId).getEventDate().isAfter(LocalDateTime.now())) {
+/*        if (eventRepository.getReferenceById(eventId).getEventDate().isAfter(LocalDateTime.now())) {
             log.info("the event (id - {}) has not happened yet", eventId);
             throw new ForbiddenException("the event has not happened yet");
-        }
+        }*/
 
         // check if user has a confirmed request to this event (if user is participant)
         if (requestRepository.findAllConfirmedRequestsByEventId(eventId).stream()

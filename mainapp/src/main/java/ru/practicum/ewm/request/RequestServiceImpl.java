@@ -142,7 +142,7 @@ public class RequestServiceImpl implements RequestService {
         int views;
         try {
             stats = statsClient.getStats(
-                    eventRepository.getReferenceById(eventId).getPublishedOn(),
+                    LocalDateTime.now().minusYears(100),
                     LocalDateTime.now(),
                     List.of("/events/" + eventId),
                     true);
