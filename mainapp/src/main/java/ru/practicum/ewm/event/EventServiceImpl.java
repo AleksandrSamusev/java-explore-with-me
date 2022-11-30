@@ -298,11 +298,14 @@ public class EventServiceImpl implements EventService {
                                                HttpServletRequest request) {
 
         String sorting = "id";
+        Pageable pageable;
         if (sort != null) {
             if (sort.equals(EventSortType.EVENT_DATE.toString())) {
                 sorting = "eventDate";
             } else if (sort.equals(EventSortType.VIEWS.toString())) {
                 sorting = "views";
+            } else if (sort.equals(EventSortType.RATING.toString())) {
+                sorting = "rating";
             }
         }
         LocalDateTime start;
@@ -317,7 +320,12 @@ public class EventServiceImpl implements EventService {
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
+
+        if (!sorting.equals("rating")) {
+            pageable = PageRequest.of(from / size, size, Sort.by(sorting));
+        } else {
+            pageable = PageRequest.of(from / size, size, Sort.by(sorting).descending());
+        }
         log.info("parameters: text - {}, categories - {}, paid - {}, rangeStart - {}, rangeEnd - {}, " +
                         "onlyAvailable - {}, sort - {}, from - {}, size - {}", text, categories, paid, start, end,
                 onlyAvailable, sort, from, size);
@@ -444,7 +452,7 @@ public class EventServiceImpl implements EventService {
         int views;
         try {
             stats = statsClient.getStats(
-                    eventRepository.getReferenceById(eventId).getPublishedOn(),
+                    LocalDateTime.now().minusYears(100),
                     LocalDateTime.now(),
                     List.of(uri),
                     false);
