@@ -19,7 +19,6 @@ public class UserDto {
     @Email
     @NotNull
     private String email;
-    private double rating;
-    private UserRank rang;
-
+    private double initiatorRating;
+    private double reviewerRating;
 }

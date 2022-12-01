@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.exception.*;
 import ru.practicum.ewm.request.RequestRepository;
+import ru.practicum.ewm.request.RequestStatus;
 import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserRank;
 import ru.practicum.ewm.user.UserRepository;
 
 import java.util.List;
@@ -83,31 +83,22 @@ public class ReviewServiceImpl implements ReviewService {
         NewReviewDto dto = ReviewMapper.toNewReviewDto(reviewRepository.save(review));
         log.info("review (id = {}) created", dto.getId());
 
-        //...calculate user rank
-        List<Review> list = reviewRepository.findAllUsersReviews(userId);
-        User tempUser = userRepository.getReferenceById(userId);
-        if (list.size() > 0 && list.size() <= 10) {
-            tempUser.setRank(UserRank.NOVICE);
-        } else if (list.size() > 10 && list.size() <= 20) {
-            tempUser.setRank(UserRank.EXPERIENCED);
-        } else if (list.size() > 20 && list.size() <= 30) {
-            tempUser.setRank(UserRank.SPECIALIST);
-        } else if (list.size() > 30) {
-            tempUser.setRank(UserRank.EXPERT);
-        }
-        userRepository.save(tempUser);
-
-        //set new rating to event initiator
+        //set new initiator rating
         User user = userRepository.getReferenceById(eventRepository.getReferenceById(eventId).getInitiator().getId());
-        double currentRating = user.getRating();
+        double currentRating = user.getInitiatorRating();
         if (currentRating == 0) {
-            user.setRating(round(calculateUserRating(eventId), 2));
+            user.setInitiatorRating(round(calculateInitiatorRating(eventId), 2));
         } else {
-            user.setRating(round(((currentRating + calculateUserRating(eventId)) / 2), 2));
+            user.setInitiatorRating(round(((currentRating + calculateInitiatorRating(eventId)) / 2), 2));
         }
         User savedUser = userRepository.save(user);
         log.info("new rating calculated: userId - {}, current rating - {},  new rating - {}",
-                user.getId(), currentRating, savedUser.getRating());
+                user.getId(), currentRating, savedUser.getInitiatorRating());
+
+        //set new reviewer rating
+        User reviewer = userRepository.getReferenceById(userId);
+        reviewer.setReviewerRating(round(calculateReviewerRating(userId), 2));
+        userRepository.save(reviewer);
         return dto;
     }
 
@@ -150,7 +141,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
-    private double calculateUserRating(Long eventId) {
+    private double calculateInitiatorRating(Long eventId) {
 
         List<Review> list = reviewRepository.findAllEventReviews(eventId);
         int positiveReviews = (int) list.stream()
@@ -163,7 +154,18 @@ public class ReviewServiceImpl implements ReviewService {
         double average = (double) positiveReviews / totalVotes;
         double score = average - (average - 0.5) * Math.pow(2, -Math.log10(totalVotes + 1));
         return score * 10;
+    }
 
+    private double calculateReviewerRating(Long userId) {
+        int allParticipated = (int) requestRepository.findAllRequestsByUserId(userId).stream()
+                .filter(request -> request.getStatus().equals(RequestStatus.CONFIRMED))
+                .count();
+        int allReviewed = (int) reviewRepository.findAllUsersReviews(userId).stream().count();
+        if (allParticipated != 0) {
+            return (double) (allReviewed / allParticipated) * 10;
+        } else {
+            return 0;
+        }
     }
 
     private static double round(double value, int places) {

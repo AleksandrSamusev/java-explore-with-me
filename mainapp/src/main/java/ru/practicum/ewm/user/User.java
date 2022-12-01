@@ -21,10 +21,9 @@ public class User {
     @Email
     private String email;
 
-    @Column(name = "rating")
-    private double rating;
+    @Column(name = "initiator_rating")
+    private double initiatorRating;
 
-    @Column(name = "rank")
-    @Enumerated(EnumType.STRING)
-    private UserRank rank;
+    @Column(name = "reviewer_rating")
+    private double reviewerRating;
 }
