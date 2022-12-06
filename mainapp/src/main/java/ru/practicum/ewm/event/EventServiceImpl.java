@@ -310,7 +310,7 @@ public class EventServiceImpl implements EventService {
         }
         LocalDateTime start;
         if (rangeStart == null) {
-            start = LocalDateTime.now();
+            start = LocalDateTime.now().minusYears(100);
         } else {
             start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }

@@ -9,6 +9,7 @@ import ru.practicum.ewm.request.RequestStatus;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,10 +54,10 @@ public class ReviewServiceImpl implements ReviewService {
         validateUserId(userId);
 
         //check if event took place
-/*        if (eventRepository.getReferenceById(eventId).getEventDate().isAfter(LocalDateTime.now())) {
+        if (eventRepository.getReferenceById(eventId).getEventDate().isAfter(LocalDateTime.now())) {
             log.info("the event (id - {}) has not happened yet", eventId);
             throw new ForbiddenException("the event has not happened yet");
-        }*/
+        }
 
         // check if user has a confirmed request to this event (if user is participant)
         if (requestRepository.findAllConfirmedRequestsByEventId(eventId).stream()
@@ -86,11 +87,7 @@ public class ReviewServiceImpl implements ReviewService {
         //set new initiator rating
         User user = userRepository.getReferenceById(eventRepository.getReferenceById(eventId).getInitiator().getId());
         double currentRating = user.getInitiatorRating();
-        if (currentRating == 0) {
-            user.setInitiatorRating(round(calculateInitiatorRating(eventId), 2));
-        } else {
-            user.setInitiatorRating(round(((currentRating + calculateInitiatorRating(eventId)) / 2), 2));
-        }
+        user.setInitiatorRating(round(calculateInitiatorRating(eventId), 2));
         User savedUser = userRepository.save(user);
         log.info("new rating calculated: userId - {}, current rating - {},  new rating - {}",
                 user.getId(), currentRating, savedUser.getInitiatorRating());

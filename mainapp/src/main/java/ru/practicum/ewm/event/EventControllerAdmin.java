@@ -11,10 +11,12 @@ import java.util.List;
 @RequestMapping("/admin/events")
 public class EventControllerAdmin {
     private final EventService eventService;
+    private final DataLoader dataLoader;
 
     @Autowired
-    public EventControllerAdmin(EventService eventService) {
+    public EventControllerAdmin(EventService eventService, DataLoader dataLoader) {
         this.eventService = eventService;
+        this.dataLoader = dataLoader;
     }
 
     @GetMapping
@@ -44,5 +46,10 @@ public class EventControllerAdmin {
     @PatchMapping("/{eventId}/reject")
     public EventFullDto rejectEvent(@PathVariable Long eventId) {
         return eventService.rejectEvent(eventId);
+    }
+
+    @PostMapping("/loadData")
+    public void loadData() {
+        dataLoader.loadData();
     }
 }

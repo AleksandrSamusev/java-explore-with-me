@@ -13,7 +13,6 @@ import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
 import ru.practicum.ewm.exception.UserNotFoundException;
 import ru.practicum.ewm.location.Location;
-import ru.practicum.ewm.request.RequestService;
 import ru.practicum.ewm.user.NewUserRequest;
 import ru.practicum.ewm.user.UserService;
 
@@ -38,7 +37,6 @@ public class EventServiceTests<T extends EventService> {
     private final EventService eventService;
     private final CategoryService categoryService;
     private final UserService userService;
-    private final RequestService requestService;
 
     @BeforeEach
     public void initData() {
