@@ -5,9 +5,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.UserConflictException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.info("User with id = {} not found", userId);
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
         log.info("delete user id = {}", userId);
         userRepository.deleteById(userId);
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
         }
         if (isUserExistsByName(newUserRequest.getName())) {
             log.info("User with name - {} already exists", newUserRequest.getName());
-            throw new UserConflictException("User with such name already exists");
+            throw new ConflictException("User with such name already exists");
         }
     }
 

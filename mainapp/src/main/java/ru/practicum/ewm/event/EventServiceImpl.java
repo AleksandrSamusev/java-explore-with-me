@@ -11,9 +11,8 @@ import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.client.model.EndpointHit;
 import ru.practicum.ewm.client.model.ViewStats;
-import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
@@ -70,7 +69,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto patchEvent(Long userId, UpdateEventRequest updateEventRequest) {
         validateUserId(userId);
         Event temp = eventRepository.findById(updateEventRequest.getEventId())
-                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Event not found"));
         if (updateEventRequest.getEventDate() != null) {
             temp.setEventDate(updateEventRequest.getEventDate());
         }
@@ -371,7 +370,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
-                new EventNotFoundException("Event not found"));
+                new NotFoundException("Event not found"));
         String uri = request.getRequestURI();
 
         event.setViews(countNotUniqueViews(eventId, uri));
@@ -394,21 +393,21 @@ public class EventServiceImpl implements EventService {
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             log.info("Event with id = {} not found", eventId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
     private void validateRequestId(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             log.info("Request with id = {} not found", requestId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.info("User with id = {} not found", userId);
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
     }
 

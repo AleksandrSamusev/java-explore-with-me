@@ -9,9 +9,8 @@ import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.ewm.category.CategoryService;
 import ru.practicum.ewm.category.NewCategoryDto;
 import ru.practicum.ewm.event.*;
-import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.location.Location;
 import ru.practicum.ewm.user.NewUserRequest;
 import ru.practicum.ewm.user.UserService;
@@ -511,7 +510,7 @@ public class EventServiceTests<T extends EventService> {
 
         eventService.createEvent(1L, event);
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> eventService.findAllUsersEvents(999L, 0, 10));
     }
 
@@ -565,7 +564,7 @@ public class EventServiceTests<T extends EventService> {
         request.setEventId(999L);
         request.setAnnotation("this is an updated annotation");
 
-        assertThrows(EventNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> eventService.patchEvent(1L, request));
     }
 
@@ -613,7 +612,7 @@ public class EventServiceTests<T extends EventService> {
 
         eventService.createEvent(1L, event);
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> eventService.findEventByUserIdAndEventId(999L, 1L));
     }
 
@@ -636,7 +635,7 @@ public class EventServiceTests<T extends EventService> {
 
         eventService.createEvent(1L, event);
 
-        assertThrows(EventNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> eventService.findEventByUserIdAndEventId(1L, 999L));
     }
 

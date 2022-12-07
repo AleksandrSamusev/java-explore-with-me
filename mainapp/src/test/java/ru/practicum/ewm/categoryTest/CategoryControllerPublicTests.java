@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.ewm.category.CategoryControllerPublic;
 import ru.practicum.ewm.category.CategoryDto;
 import ru.practicum.ewm.category.CategoryServiceImpl;
-import ru.practicum.ewm.exception.CategoryNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ public class CategoryControllerPublicTests {
     @Test
     void getIncorrectCategoryById() throws Exception {
 
-        Mockito.when(categoryService.getCategoryById(Mockito.any())).thenThrow(CategoryNotFoundException.class);
+        Mockito.when(categoryService.getCategoryById(Mockito.any())).thenThrow(NotFoundException.class);
 
         mvc.perform(get("/categories/1"))
                 .andExpect(status().isNotFound());

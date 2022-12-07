@@ -9,9 +9,9 @@ import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryDto;
 import ru.practicum.ewm.category.CategoryService;
 import ru.practicum.ewm.category.NewCategoryDto;
-import ru.practicum.ewm.exception.CategoryConflictException;
-import ru.practicum.ewm.exception.CategoryNotFoundException;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.InvalidParameterException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -68,7 +68,7 @@ public class CategoryServiceTest<T extends CategoryService> {
 
         categoryService.createCategory(newCategoryDto1);
 
-        assertThrows(CategoryConflictException.class,
+        assertThrows(ConflictException.class,
                 () -> categoryService.createCategory(newCategoryDto2));
 
     }
@@ -87,7 +87,7 @@ public class CategoryServiceTest<T extends CategoryService> {
         NewCategoryDto newCategoryDto = new NewCategoryDto("new_category");
         categoryService.createCategory(newCategoryDto);
 
-        assertThrows(CategoryNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> categoryService.getCategoryById(999L));
     }
 
@@ -117,7 +117,7 @@ public class CategoryServiceTest<T extends CategoryService> {
 
         categoryService.deleteCategory(1L);
 
-        assertThrows(CategoryNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> categoryService.getCategoryById(1L));
     }
 
@@ -141,7 +141,7 @@ public class CategoryServiceTest<T extends CategoryService> {
 
         categoryService.createCategory(newCategory);
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.patchCategory(patchedCategory));
+        assertThrows(NotFoundException.class, () -> categoryService.patchCategory(patchedCategory));
     }
 
     @Test
@@ -185,7 +185,7 @@ public class CategoryServiceTest<T extends CategoryService> {
 
         categoryService.createCategory(newCategory);
 
-        assertThrows(CategoryConflictException.class, () -> categoryService.patchCategory(patchedCategory));
+        assertThrows(ConflictException.class, () -> categoryService.patchCategory(patchedCategory));
     }
 
 }

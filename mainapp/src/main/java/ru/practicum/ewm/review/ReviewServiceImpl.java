@@ -3,7 +3,9 @@ package ru.practicum.ewm.review;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.EventRepository;
-import ru.practicum.ewm.exception.*;
+import ru.practicum.ewm.exception.ForbiddenException;
+import ru.practicum.ewm.exception.InvalidParameterException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.request.RequestStatus;
 import ru.practicum.ewm.user.User;
@@ -114,14 +116,14 @@ public class ReviewServiceImpl implements ReviewService {
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.info("User with id = {} not found", userId);
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
     }
 
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             log.info("Event with id = {} not found", eventId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
@@ -134,7 +136,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new InvalidParameterException("parameter id less or even to 0");
         } else if (!reviewRepository.existsById(dto.getId())) {
             log.info("review (id = {}) not found", dto.getId());
-            throw new ReviewNotFoundException("review not found");
+            throw new NotFoundException("review not found");
         }
     }
 

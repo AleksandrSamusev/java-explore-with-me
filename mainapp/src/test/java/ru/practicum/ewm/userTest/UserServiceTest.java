@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.UserConflictException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.NewUserRequest;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserDto;
@@ -86,7 +86,7 @@ public class UserServiceTest<T extends UserService> {
         NewUserRequest user2 = new NewUserRequest("user2@user.com", "User");
         userService.createUser(user1);
 
-        assertThrows(UserConflictException.class,
+        assertThrows(ConflictException.class,
                 () -> userService.createUser(user2));
     }
 
@@ -108,7 +108,7 @@ public class UserServiceTest<T extends UserService> {
         NewUserRequest user = new NewUserRequest("User@user.com", "User");
         userService.createUser(user);
 
-        assertThrows(UserNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> userService.deleteUserById(999L));
     }
 

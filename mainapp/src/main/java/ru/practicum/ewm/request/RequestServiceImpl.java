@@ -8,10 +8,8 @@ import ru.practicum.ewm.client.model.ViewStats;
 import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.event.EventState;
-import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.RequestNotFoundException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -119,21 +117,21 @@ public class RequestServiceImpl implements RequestService {
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             log.info("Event with id = {} not found", eventId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.info("User with id = {} not found", userId);
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
     }
 
     private void validateRequestId(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             log.info("Request with id = {} not found", requestId);
-            throw new RequestNotFoundException("Request not found");
+            throw new NotFoundException("Request not found");
         }
     }
 

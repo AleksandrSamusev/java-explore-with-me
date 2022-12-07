@@ -9,8 +9,8 @@ import ru.practicum.ewm.compilation.Compilation;
 import ru.practicum.ewm.compilation.CompilationDto;
 import ru.practicum.ewm.compilation.CompilationService;
 import ru.practicum.ewm.compilation.NewCompilationDto;
-import ru.practicum.ewm.exception.CompilationNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -82,7 +82,7 @@ public class CompilationServiceTests<T extends CompilationService> {
         NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
         compilationService.createCompilation(comp);
 
-        assertThrows(CompilationNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> compilationService.deleteCompilationById(999L));
     }
 
@@ -102,7 +102,7 @@ public class CompilationServiceTests<T extends CompilationService> {
         NewCompilationDto comp = new NewCompilationDto(List.of(), "compilation", false);
         compilationService.createCompilation(comp);
 
-        assertThrows(CompilationNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> compilationService.findCompilationByCompilationId(999L));
     }
 
@@ -170,7 +170,7 @@ public class CompilationServiceTests<T extends CompilationService> {
         NewCompilationDto pinned = new NewCompilationDto(List.of(), "pinned_compilation", true);
         compilationService.createCompilation(pinned);
 
-        assertThrows(CompilationNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> compilationService.unpinCompilation(999L));
     }
 
@@ -192,7 +192,7 @@ public class CompilationServiceTests<T extends CompilationService> {
         NewCompilationDto unpinned = new NewCompilationDto(List.of(), "unpinned_compilation", false);
         compilationService.createCompilation(unpinned);
 
-        assertThrows(CompilationNotFoundException.class,
+        assertThrows(NotFoundException.class,
                 () -> compilationService.pinCompilation(999L));
 
     }

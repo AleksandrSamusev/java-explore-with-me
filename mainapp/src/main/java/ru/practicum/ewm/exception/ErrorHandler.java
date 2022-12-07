@@ -22,7 +22,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleUserNotFoundException(final UserNotFoundException e) {
+    public ApiError handleNotFoundException(final NotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
         e.printStackTrace(pw);
         String stackTrace = sw.toString();
@@ -36,7 +36,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleCategoryConflictException(final CategoryConflictException e) {
+    public ApiError handleConflictException(final ConflictException e) {
         log.info("409 {}", e.getMessage(), e);
         e.printStackTrace(pw);
         String stackTrace = sw.toString();
@@ -44,76 +44,6 @@ public class ErrorHandler {
         apiError.setStatus(HttpStatus.CONFLICT.name());
         apiError.setMessage(e.getMessage());
         apiError.setReason("Conflict");
-        apiError.setTimestamp(Timestamp.from(Instant.now()));
-        return apiError;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleUserConflictException(final UserConflictException e) {
-        log.info("409 {}", e.getMessage(), e);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-        apiError.setErrors(Collections.singletonList(stackTrace));
-        apiError.setStatus(HttpStatus.CONFLICT.name());
-        apiError.setMessage(e.getMessage());
-        apiError.setReason("Conflict");
-        apiError.setTimestamp(Timestamp.from(Instant.now()));
-        return apiError;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleCategoryNotFoundException(final CategoryNotFoundException e) {
-        log.info("404 {}", e.getMessage(), e);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-        apiError.setErrors(Collections.singletonList(stackTrace));
-        apiError.setStatus(HttpStatus.NOT_FOUND.name());
-        apiError.setMessage(e.getMessage());
-        apiError.setReason("Not found");
-        apiError.setTimestamp(Timestamp.from(Instant.now()));
-        return apiError;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleEventNotFoundException(final EventNotFoundException e) {
-        log.info("404 {}", e.getMessage(), e);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-        apiError.setErrors(Collections.singletonList(stackTrace));
-        apiError.setStatus(HttpStatus.NOT_FOUND.name());
-        apiError.setMessage(e.getMessage());
-        apiError.setReason("Not found");
-        apiError.setTimestamp(Timestamp.from(Instant.now()));
-        return apiError;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleRequestNotFoundException(final RequestNotFoundException e) {
-        log.info("404 {}", e.getMessage(), e);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-        apiError.setErrors(Collections.singletonList(stackTrace));
-        apiError.setStatus(HttpStatus.NOT_FOUND.name());
-        apiError.setMessage(e.getMessage());
-        apiError.setReason("Not found");
-        apiError.setTimestamp(Timestamp.from(Instant.now()));
-        return apiError;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleCompilationNotFoundException(final CompilationNotFoundException e) {
-        log.info("404 {}", e.getMessage(), e);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-        apiError.setErrors(Collections.singletonList(stackTrace));
-        apiError.setStatus(HttpStatus.NOT_FOUND.name());
-        apiError.setMessage(e.getMessage());
-        apiError.setReason("Not found");
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
     }
@@ -128,20 +58,6 @@ public class ErrorHandler {
         apiError.setStatus(HttpStatus.BAD_REQUEST.name());
         apiError.setMessage(e.getMessage());
         apiError.setReason("Bad request");
-        apiError.setTimestamp(Timestamp.from(Instant.now()));
-        return apiError;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleReviewNotFoundException(final ReviewNotFoundException e) {
-        log.info("404 {}", e.getMessage(), e);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-        apiError.setErrors(Collections.singletonList(stackTrace));
-        apiError.setStatus(HttpStatus.NOT_FOUND.name());
-        apiError.setMessage(e.getMessage());
-        apiError.setReason("Not found");
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
     }
