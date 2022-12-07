@@ -76,7 +76,7 @@ public class ReviewServiceImpl implements ReviewService {
         //check if review from this user to this event already exists
         if (reviewRepository.findUsersReviewToEvent(userId, eventId) != null) {
             log.info("review to event (id - {}) from user (id - {}) already exists", eventId, userId);
-            throw new ForbiddenException("review from this user ti this event already exists");
+            throw new ForbiddenException("review from this user to this event already exists");
         }
 
         //...if he is a participant - create review

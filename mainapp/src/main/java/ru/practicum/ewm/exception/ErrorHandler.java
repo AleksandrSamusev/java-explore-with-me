@@ -28,7 +28,7 @@ public class ErrorHandler {
         String stackTrace = sw.toString();
         apiError.setErrors(Collections.singletonList(stackTrace));
         apiError.setStatus(HttpStatus.NOT_FOUND.name());
-        apiError.setMessage(e.getMessage());
+        apiError.setMessage(e.getLocalizedMessage());
         apiError.setReason("Not found");
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
@@ -42,7 +42,7 @@ public class ErrorHandler {
         String stackTrace = sw.toString();
         apiError.setErrors(Collections.singletonList(stackTrace));
         apiError.setStatus(HttpStatus.CONFLICT.name());
-        apiError.setMessage(e.getMessage());
+        apiError.setMessage(e.getLocalizedMessage());
         apiError.setReason("Conflict");
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
@@ -56,7 +56,7 @@ public class ErrorHandler {
         String stackTrace = sw.toString();
         apiError.setErrors(Collections.singletonList(stackTrace));
         apiError.setStatus(HttpStatus.BAD_REQUEST.name());
-        apiError.setMessage(e.getMessage());
+        apiError.setMessage(e.getLocalizedMessage());
         apiError.setReason("Bad request");
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
@@ -70,7 +70,7 @@ public class ErrorHandler {
         String stackTrace = sw.toString();
         apiError.setErrors(Collections.singletonList(stackTrace));
         apiError.setStatus(HttpStatus.FORBIDDEN.name());
-        apiError.setMessage(e.getMessage());
+        apiError.setMessage(e.getLocalizedMessage());
         apiError.setReason("Forbidden");
         apiError.setTimestamp(Timestamp.from(Instant.now()));
         return apiError;
