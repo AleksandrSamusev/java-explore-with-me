@@ -12,5 +12,7 @@ public interface ReviewService {
 
     NewReviewDto createReview(NewReviewDto newReviewDto, Long userId, Long eventId);
 
-    ShortReviewDto changeReview(Long userId, NewReviewDto newReviewDto);
+    ShortReviewDto changeReview(Long userId, Long reviewId, NewReviewDto newReviewDto);
+
+    void deleteReviewById(Long reviewId);
 }

@@ -102,7 +102,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ShortReviewDto changeReview(Long userId, NewReviewDto newReviewDto) {
+    public ShortReviewDto changeReview(Long userId, Long reviewId, NewReviewDto newReviewDto) {
+        validateReviewId(reviewId);
         validateChangedReview(newReviewDto);
         validateUserId(userId);
         Review review = reviewRepository.getReferenceById(newReviewDto.getId());
@@ -111,6 +112,34 @@ public class ReviewServiceImpl implements ReviewService {
         }
         log.info("review (id = {}) changed", newReviewDto.getId());
         return ReviewMapper.toShortReviewDto(reviewRepository.save(review));
+    }
+
+    @Override
+    public void deleteReviewById(Long reviewId) {
+        validateReviewId(reviewId);
+
+        User reviewer = userRepository.getReferenceById(
+                reviewRepository.getReferenceById(reviewId).getReviewer().getId());
+        User initiator = userRepository.getReferenceById(
+                reviewRepository.getReferenceById(reviewId).getEvent().getInitiator().getId());
+        Long eventId = reviewRepository.getReferenceById(reviewId).getEvent().getId();
+
+        reviewRepository.deleteById(reviewId);
+
+        //recalculate reviewers rating
+        double currentReviewerRating = reviewer.getReviewerRating();
+        reviewer.setReviewerRating(round(calculateReviewerRating(reviewer.getId()), 2));
+        double newReviewerRating = reviewer.getReviewerRating();
+        userRepository.save(reviewer);
+        log.info("review (id = {}) was deleted. Reviewer rating was changed from {} to {}",
+                reviewId, currentReviewerRating, newReviewerRating);
+
+        //recalculate initiator rating
+        double currentInitiatorRating = initiator.getInitiatorRating();
+        initiator.setInitiatorRating(round(calculateInitiatorRating(eventId), 2));
+        User savedUser = userRepository.save(initiator);
+        log.info("new rating calculated: userId - {}, current rating - {},  new rating - {}",
+                initiator.getId(), currentInitiatorRating, savedUser.getInitiatorRating());
     }
 
     private void validateUserId(Long userId) {
@@ -127,6 +156,13 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
+    private void validateReviewId(Long reviewId) {
+        if (!reviewRepository.existsById(reviewId)) {
+            log.info("review (id = {}) not found", reviewId);
+            throw new NotFoundException("review not found");
+        }
+    }
+
     private void validateChangedReview(NewReviewDto dto) {
         if (dto.getId() == null) {
             log.info("mandatory parameter id is null");
@@ -134,9 +170,6 @@ public class ReviewServiceImpl implements ReviewService {
         } else if (dto.getId() <= 0) {
             log.info("parameter id <= 0");
             throw new InvalidParameterException("parameter id less or even to 0");
-        } else if (!reviewRepository.existsById(dto.getId())) {
-            log.info("review (id = {}) not found", dto.getId());
-            throw new NotFoundException("review not found");
         }
     }
 

@@ -42,10 +42,11 @@ public class ReviewControllerPublic {
         return reviewService.createReview(newReviewDto, userId, eventId);
     }
 
-    @PatchMapping("/{userId}/reviews")
+    @PatchMapping("/{userId}/reviews/{reviewId}")
     public ShortReviewDto changeReview(@PathVariable Long userId,
+                                       @PathVariable Long reviewId,
                                        @Valid @RequestBody NewReviewDto newReviewDto) {
-        return reviewService.changeReview(userId, newReviewDto);
+        return reviewService.changeReview(userId, reviewId, newReviewDto);
     }
 
 
