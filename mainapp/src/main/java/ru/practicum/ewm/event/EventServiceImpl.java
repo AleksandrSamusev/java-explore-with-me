@@ -11,9 +11,8 @@ import ru.practicum.ewm.category.CategoryRepository;
 import ru.practicum.ewm.client.StatsClient;
 import ru.practicum.ewm.client.model.EndpointHit;
 import ru.practicum.ewm.client.model.ViewStats;
-import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
-import ru.practicum.ewm.exception.UserNotFoundException;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.*;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
@@ -60,6 +59,7 @@ public class EventServiceImpl implements EventService {
         event.setInitiator(user);
         event.setCategory(category);
         event.setAvailable(true);
+        event.setRatingFlag(true);
         Event saved = eventRepository.save(event);
         log.info("New event from user with id = {} created", userId);
         return EventMapper.toEventFullDto(saved);
@@ -69,7 +69,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto patchEvent(Long userId, UpdateEventRequest updateEventRequest) {
         validateUserId(userId);
         Event temp = eventRepository.findById(updateEventRequest.getEventId())
-                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Event not found"));
         if (updateEventRequest.getEventDate() != null) {
             temp.setEventDate(updateEventRequest.getEventDate());
         }
@@ -138,14 +138,25 @@ public class EventServiceImpl implements EventService {
         validateUserId(userId);
         validateEventId(eventId);
         validateRequestId(requestId);
+
         Request tempRequest = requestRepository.getReferenceById(requestId);
         Event tempEvent = eventRepository.getReferenceById(eventId);
+
         if (tempEvent.getParticipantLimit() == 0 && !tempEvent.getRequestModeration()) {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
             log.info("Limit - {}. Current requests - {}", tempEvent.getParticipantLimit(),
                     tempEvent.getConfirmedRequests());
             eventRepository.save(tempEvent);
+
+            if (!eventRepository.getReferenceById(eventId).getRatingFlag().equals(Boolean.FALSE)) {
+                Event event = eventRepository.getReferenceById(eventId);
+                double rating = round(((double) event.getConfirmedRequests()
+                        / countUniqueViews(eventId) * 100), 2);
+                event.setRating(rating);
+                eventRepository.save(event);
+            }
+
         } else if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                 == tempEvent.getParticipantLimit() && tempEvent.getParticipantLimit() != 0) {
             log.info("Request with id = {} was not confirmed. Participants limit to event with id = {} reached",
@@ -155,8 +166,22 @@ public class EventServiceImpl implements EventService {
             tempRequest.setStatus(RequestStatus.CONFIRMED);
             tempEvent.setConfirmedRequests(tempEvent.getConfirmedRequests() + 1L);
             eventRepository.save(tempEvent);
+
+            if (!eventRepository.getReferenceById(eventId).getRatingFlag().equals(Boolean.FALSE)) {
+                Event event = eventRepository.getReferenceById(eventId);
+                double rating = round(((double) event.getConfirmedRequests()
+                        / countUniqueViews(eventId) * 100), 2);
+                event.setRating(rating);
+                eventRepository.save(event);
+            }
+
             if (requestRepository.findAllConfirmedRequestsByEventId(eventId).size()
                     == tempEvent.getParticipantLimit()) {
+
+                Event event = eventRepository.getReferenceById(eventId);
+                event.setRatingFlag(Boolean.FALSE);
+                eventRepository.save(event);
+
                 log.info("Requests limit ({}) for event - (id - {}) reached. Set all PENDING to REJECT",
                         tempEvent.getParticipantLimit(), eventId);
                 List<Request> pendingRequests = requestRepository.findAllPendingRequestsByEventId(eventId);
@@ -271,30 +296,39 @@ public class EventServiceImpl implements EventService {
                                                String sort, Integer from, Integer size,
                                                HttpServletRequest request) {
 
-        String sorting;
-        if (sort.equals(EventSortType.EVENT_DATE.toString())) {
-            sorting = "eventDate";
-        } else if (sort.equals(EventSortType.VIEWS.toString())) {
-            sorting = "views";
-        } else {
-            sorting = "id";
+        String sorting = "id";
+        Pageable pageable;
+        if (sort != null) {
+            if (sort.equals(EventSortType.EVENT_DATE.toString())) {
+                sorting = "eventDate";
+            } else if (sort.equals(EventSortType.VIEWS.toString())) {
+                sorting = "views";
+            } else if (sort.equals(EventSortType.RATING.toString())) {
+                sorting = "rating";
+            }
         }
         LocalDateTime start;
-        if (rangeStart.equals("null")) {
-            start = LocalDateTime.now();
+        if (rangeStart == null) {
+            start = LocalDateTime.now().minusYears(100);
         } else {
             start = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         LocalDateTime end;
-        if (rangeEnd.equals("null")) {
+        if (rangeEnd == null) {
             end = LocalDateTime.now().plusYears(100);
         } else {
             end = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by(sorting));
+
+        if (!sorting.equals("rating")) {
+            pageable = PageRequest.of(from / size, size, Sort.by(sorting));
+        } else {
+            pageable = PageRequest.of(from / size, size, Sort.by(sorting).descending());
+        }
         log.info("parameters: text - {}, categories - {}, paid - {}, rangeStart - {}, rangeEnd - {}, " +
                         "onlyAvailable - {}, sort - {}, from - {}, size - {}", text, categories, paid, start, end,
                 onlyAvailable, sort, from, size);
+
         List<Event> sortedEvents = eventRepository.getFilteredEvents(text, categories,
                 paid, start, end, pageable);
 
@@ -306,10 +340,12 @@ public class EventServiceImpl implements EventService {
             }
         }
         sortedEvents.forEach(e -> {
-            List<ViewStats> stats = null;
+            LocalDateTime statStart = LocalDateTime.now().minusYears(100);
+            LocalDateTime statsEnd = LocalDateTime.now();
+            List<ViewStats> stats;
             try {
-                stats = statsClient.getStats(start,
-                        end,
+                stats = statsClient.getStats(statStart,
+                        statsEnd,
                         List.of(String.format("/events/%s", e.getId())),
                         false);
                 log.info("set views - {}", stats.size());
@@ -325,25 +361,19 @@ public class EventServiceImpl implements EventService {
             }
         });
         eventRepository.saveAll(sortedEvents);
+
         sentHitStat(request);
 
         return EventMapper.toEventShortDtos(sortedEvents);
     }
 
     @Override
-    public EventFullDto getEvent(Long eventId, HttpServletRequest request) throws JsonProcessingException {
+    public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
-                new EventNotFoundException("Event not found"));
-        List<String> uris = List.of(request.getRequestURI());
-        List<ViewStats> stats = statsClient.getStats(LocalDateTime.now(),
-                LocalDateTime.now(), uris, true);
-        int hits = 0;
-        for (ViewStats viewStats : stats) {
-            if (viewStats.getApp().equals("mainApp")) {
-                hits = hits + viewStats.getHits();
-            }
-        }
-        event.setViews(hits);
+                new NotFoundException("Event not found"));
+        String uri = request.getRequestURI();
+
+        event.setViews(countNotUniqueViews(eventId, uri));
         eventRepository.save(event);
         sentHitStat(request);
         return EventMapper.toEventFullDto(event);
@@ -363,21 +393,21 @@ public class EventServiceImpl implements EventService {
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             log.info("Event with id = {} not found", eventId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
     private void validateRequestId(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             log.info("Request with id = {} not found", requestId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
     private void validateUserId(Long userId) {
         if (!userRepository.existsById(userId)) {
             log.info("User with id = {} not found", userId);
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
     }
 
@@ -414,5 +444,55 @@ public class EventServiceImpl implements EventService {
             log.info("Title should be more then 3 chars and less then 120");
             throw new InvalidParameterException("title does not meet the requirements");
         }
+    }
+
+    private int countNotUniqueViews(Long eventId, String uri) {
+        List<ViewStats> stats;
+        int views;
+        try {
+            stats = statsClient.getStats(
+                    LocalDateTime.now().minusYears(100),
+                    LocalDateTime.now(),
+                    List.of(uri),
+                    false);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        }
+        if (stats.isEmpty()) {
+            views = 0;
+        } else {
+            views = stats.get(0).getHits();
+        }
+        log.info("VIEWS = {}", views);
+        return views;
+    }
+
+    private int countUniqueViews(Long eventId) {
+        List<ViewStats> stats;
+        int views;
+        try {
+            stats = statsClient.getStats(
+                    eventRepository.getReferenceById(eventId).getPublishedOn(),
+                    LocalDateTime.now(),
+                    List.of("/events/" + eventId),
+                    true);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        }
+        if (stats.isEmpty()) {
+            views = 0;
+        } else {
+            views = stats.size();
+        }
+        log.info("VIEWS = {}", views);
+        return views;
+    }
+
+    private double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
     }
 }

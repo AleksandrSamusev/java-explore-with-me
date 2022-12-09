@@ -1,24 +1,23 @@
-package ru.practicum.ewm.user;
+package ru.practicum.ewm.review;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto {
+public class NewReviewDto {
     private Long id;
     @NotNull
-    private String name;
-    @Email
-    @NotNull
-    private String email;
-    private double initiatorRating;
-    private double reviewerRating;
+    private Boolean review;
+    @Length(max = 2000)
+    private String comment;
 }

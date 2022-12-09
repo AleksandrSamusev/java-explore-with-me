@@ -25,6 +25,21 @@ public class HitServiceImpl implements HitService {
 
     @Override
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        return hitRepository.findAllByStartEndTime(start, end, uris, unique);
+
+        List<ViewStats> stats;
+        if (uris.isEmpty()) {
+            if (unique) {
+                stats = hitRepository.findAllByStartEndTimeNoUrisUnique(start, end);
+            } else {
+                stats = hitRepository.findAllByStartEndTimeNoUris(start, end);
+            }
+        } else {
+            if (unique) {
+                stats = hitRepository.findAllByStartEndTimeWithUrisUnique(start, end, uris);
+            } else {
+                stats = hitRepository.findAllByStartEndTimeWithUris(start, end, uris);
+            }
+        }
+        return stats;
     }
 }

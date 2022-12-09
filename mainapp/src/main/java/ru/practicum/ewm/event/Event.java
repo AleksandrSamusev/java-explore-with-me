@@ -1,8 +1,12 @@
 package ru.practicum.ewm.event;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.compilation.Compilation;
+import ru.practicum.ewm.review.Review;
 import ru.practicum.ewm.user.User;
 
 import javax.persistence.*;
@@ -12,6 +16,9 @@ import java.util.List;
 @Entity
 @Table(name = "events")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,4 +77,12 @@ public class Event {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "events")
     private List<Compilation> compilations;
 
+    @OneToMany
+    private List<Review> reviews;
+
+    @Column(name = "rating")
+    private double rating;
+
+    @Column(name = "rating_flag")
+    private Boolean ratingFlag;
 }

@@ -7,9 +7,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.event.EventRepository;
-import ru.practicum.ewm.exception.CompilationNotFoundException;
-import ru.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.ewm.exception.InvalidParameterException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto findCompilationByCompilationId(Long compilationId) {
         return CompilationMapper.toCompilationDto(compilationRepository.findById(compilationId)
-                .orElseThrow(() -> new CompilationNotFoundException("Compilation not found")));
+                .orElseThrow(() -> new NotFoundException("Compilation not found")));
     }
 
     @Override
@@ -126,14 +125,14 @@ public class CompilationServiceImpl implements CompilationService {
     private void validateCompilationId(Long compilationId) {
         if (!compilationRepository.existsById(compilationId)) {
             log.info("Compilation with id = {} was not found", compilationId);
-            throw new CompilationNotFoundException("Compilation not found");
+            throw new NotFoundException("Compilation not found");
         }
     }
 
     private void validateEventId(Long eventId) {
         if (!eventRepository.existsById(eventId)) {
             log.info("Event with id = {} was not found", eventId);
-            throw new EventNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
     }
 
@@ -144,7 +143,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
         if (!ids.contains(eventId)) {
             log.info("Event with id = {} not was not found in compilation with id = {}", eventId, compilationId);
-            throw new EventNotFoundException("Event not in compilation");
+            throw new NotFoundException("Event not in compilation");
         }
     }
 }

@@ -3,12 +3,12 @@ package ru.practicum.ewm.exception;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class ApiError {
-    private Set<String> errors = new HashSet<>();
+    private List<String> errors = new ArrayList<>();
     private String message;
     private String reason;
     private String status;

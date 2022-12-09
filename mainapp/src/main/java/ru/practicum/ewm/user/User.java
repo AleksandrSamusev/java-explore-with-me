@@ -20,4 +20,10 @@ public class User {
     @Column(name = "email", nullable = false)
     @Email
     private String email;
+
+    @Column(name = "initiator_rating")
+    private double initiatorRating;
+
+    @Column(name = "reviewer_rating")
+    private double reviewerRating;
 }

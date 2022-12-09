@@ -6,9 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.EventRepository;
-import ru.practicum.ewm.exception.CategoryConflictException;
-import ru.practicum.ewm.exception.CategoryNotFoundException;
+import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.InvalidParameterException;
+import ru.practicum.ewm.exception.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getCategoryById(Long categoryId) {
         return CategoryMapper.toCategoryDto(categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CategoryNotFoundException("Category not found")));
+                .orElseThrow(() -> new NotFoundException("Category not found")));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto patchCategory(CategoryDto categoryDto) {
         validateCategoryDto(categoryDto);
         Category category = categoryRepository.findById(categoryDto.getId())
-                .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
+                .orElseThrow(() -> new NotFoundException("Category not found"));
         category.setName(categoryDto.getName());
         log.info("Updated category with ID = {} ", categoryDto.getId());
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
@@ -71,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         if (isCategoryExistsByName(categoryDto.getName())) {
             log.info("Category id - \"{}\".Name - {} already exists", categoryDto.getId(), categoryDto.getName());
-            throw new CategoryConflictException("Category with this name already exists");
+            throw new ConflictException("Category with this name already exists");
         }
     }
 
@@ -82,7 +82,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         if (isCategoryExistsByName(newCategoryDto.getName())) {
             log.info("Category with the name - {} already exists", newCategoryDto.getName());
-            throw new CategoryConflictException("Category with this name already exists");
+            throw new ConflictException("Category with this name already exists");
         }
     }
 
